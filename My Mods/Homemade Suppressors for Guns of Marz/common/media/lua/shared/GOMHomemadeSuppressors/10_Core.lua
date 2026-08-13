@@ -95,47 +95,66 @@ local function swap(player,weapon,oldPart,newType,newCondition,broken)
     weapon:detachWeaponPart(oldPart); weapon:attachWeaponPart(np); sync(player,weapon); return np
 end
 local function dropBrokenPlastic(player,weapon,part,cfg)
-    local maxc=part:getConditionMax(); weapon:detachWeaponPart(part)
+    local maxc=part:getConditionMax()
+    weapon:detachWeaponPart(part)
+
     local b=instanceItem(cfg.brokenType)
-    if b then
-        b:setConditionMax(maxc); b:setCondition(0); b:setBroken(true)
-        local md=b:getModData(); md.GOMHSInitialized=true; md.GOMHSRolledCondition=maxc
-        -- Drop the detached plastic suppressor on the square in front of the
-        -- character. Fall back to the current square/inventory only if the
-        -- target square cannot be resolved.
-        local fx,fy=player:getForwardDirectionX(),player:getForwardDirectionY()
-        local dx=(fx>0.35 and 1) or (fx<-0.35 and -1) or 0
-        local dy=(fy>0.35 and 1) or (fy<-0.35 and -1) or 0
-        local cell=player:getCell()
-        local sq=nil
-        if cell then
-            sq=cell:getGridSquare(math.floor(player:getX())+dx,math.floor(player:getY())+dy,math.floor(player:getZ()))
-        end
-        if not sq then sq=player:getCurrentSquare() end
-        if sq then sq:AddWorldInventoryItem(b,0.50,0.50,0.0) else player:getInventory():AddItem(b) end
+    if not b then
+        print("[GOM HS] ERROR: could not create broken plastic suppressor item")
+        sync(player,weapon)
+        return
     end
+
+    b:setConditionMax(maxc)
+    b:setCondition(0)
+    b:setBroken(true)
+    local md=b:getModData()
+    md.GOMHSInitialized=true
+    md.GOMHSRolledCondition=maxc
+
+    -- Drop on the PLAYER'S CURRENT SQUARE, not the square in front.
+    -- The previous front-square placement could make the item look as if it
+    -- simply vanished. Use the explicit transmit overload and verify success.
+    local sq=player:getCurrentSquare()
+    local placed=nil
+    if sq then
+        local ok, result = pcall(function()
+            return sq:AddWorldInventoryItem(b,0.50,0.50,0.05,true)
+        end)
+        if ok then placed=result end
+    end
+
+    if placed then
+        print("[GOM HS] broken plastic suppressor dropped on current square")
+    else
+        -- Never delete the broken suppressor. If world placement fails for any
+        -- reason, return it to player inventory as a guaranteed fallback.
+        player:getInventory():AddItem(b)
+        print("[GOM HS] WARNING: floor drop failed; broken plastic suppressor returned to inventory")
+    end
+
     sync(player,weapon)
 end
+
 local function getCanon(weapon)
     if not weapon or not weapon.getWeaponPart then return nil end
     return weapon:getWeaponPart("Canon")
 end
 
--- MarzGuns Sound Overhaul can assign its shot sound after SWMG has rebuilt
--- attachment stats. Re-assert the homemade suppressor sound at the weapon-swing
--- boundary and while the attachment is active. This does not change gameplay
--- SoundRadius/SoundVolume; those continue to come from SWMG.
-local function enforceWorkingSuppressorSound(weapon)
+-- Keep the audible report suppressed for BOTH working and critical/last-shot
+-- states. Fix 3.8 only enforced the sound for "working", so the final shot could
+-- suddenly use the gun's normal report even though gameplay suppression remained.
+local function enforceSuppressorSound(weapon)
     if not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
     local part=getCanon(weapon); if not part then return end
     local info=TYPE_STATE[part:getFullType()]
-    if info and info.state=="working" and weapon.setSwingSound then
+    if info and (info.state=="working" or info.state=="critical") and weapon.setSwingSound then
         weapon:setSwingSound("CapGunRifleShoot")
     end
 end
 
 local function onWeaponSwingAudio(attacker,weapon)
-    enforceWorkingSuppressorSound(weapon)
+    enforceSuppressorSound(weapon)
 end
 Events.OnWeaponSwing.Add(onWeaponSwingAudio)
 local function processShot(player,weapon)
@@ -174,7 +193,7 @@ local counter=0
 local function periodic(player)
     if not player then return end
     local held=player:getPrimaryHandItem()
-    if held and instanceof(held,"HandWeapon") then enforceWorkingSuppressorSound(held) end
+    if held and instanceof(held,"HandWeapon") then enforceSuppressorSound(held) end
     counter=counter+1; if counter<60 then return end; counter=0
     autoLearn(player)
     local weapon=player:getPrimaryHandItem()
@@ -187,4 +206,4 @@ local function periodic(player)
     end
 end
 Events.OnPlayerUpdate.Add(periodic)
-print("[GOM HS] core loaded for B42.20.2")
+print("[GOM HS] Fix 3.9 core loaded for B42.20.2")

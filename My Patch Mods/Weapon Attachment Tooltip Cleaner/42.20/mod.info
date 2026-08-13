@@ -1,10 +1,11 @@
 name=Weapon Attachment Tooltip Cleaner
 id=WeaponAttachmentTooltipCleaner
-version=1.0
-modversion=2
+version=1.1
+modversion=3
 versionMin=42.20.2
-description=Safely replaces long horizontal MountOn compatibility text with a vertical list for weapon attachments. Does not mutate item/script MountOn data while rendering tooltips.
+description=Hides only the generic WeaponPart MountOn / "Can be attached to" tooltip row while preserving the original tooltip renderer, ammo count, ammo type, weight, stats and other mod-added information.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
-loadModAfter=HBVCEFb42,MarzGuns
+require=MarzGuns
+loadModAfter=HBVCEFb42,MarzGuns,GOM_HomemadeSuppressors

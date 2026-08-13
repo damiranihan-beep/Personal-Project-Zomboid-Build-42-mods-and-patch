@@ -77,3 +77,27 @@ Smoking Universal Patch НЕ возвращает пачку/зажигалку 
 
 [?] 15. Realistic Combat: AttackVars.clear вызывает ошибку при отмене off-hand атаки.
 Исправлено в Fix 3.3: прямой вызов Java AttackVars.clear полностью удалён. Нужен live-тест.
+
+
+[?] Tooltip Cleaner v1.1: скрывается исключительно MountOn / «Можно закрепить на».
+    Полный renderer больше не подменяется; патроны, вес и остальные строки должны сохраниться. Нужен live-тест.
+
+[?] Realistic Combat Fix 3.4: off-hand finisher / close-kill запрещён полностью. Нужен live-тест.
+
+[x] Добавлены load-order подсказки: Realistic Combat после FancyHandwork/FH;
+    suppressor/cleaner после MarzGuns; перевод loadLast.
+
+[x] Добавлен аудит 61 семейства обвесов Guns of Marz и сравнительный баланс.
+
+
+[?] Homemade Suppressors Fix 3.9: исправить периодический обычный звук при стрельбе.
+Причина найдена: Critical-состояние не получало приглушённый SwingSound.
+Исправлено кодом; нужен live-тест.
+
+[?] Homemade Suppressors Fix 3.9: сломанный пластиковый глушитель не был заметен на полу.
+Теперь drop идёт на текущую клетку, с проверкой результата и fallback в инвентарь. Нужен live-тест.
+
+[x] Homemade Suppressors Fix 3.9: утверждён новый баланс:
+- шум -45/-55/-65%;
+- рабочие: -10% урон, -10% дальность, -10% шанс крита;
+- broken can/pipe: +10% шум, -20% урон, -20% дальность, -10% шанс крита, -20% крит. урон.

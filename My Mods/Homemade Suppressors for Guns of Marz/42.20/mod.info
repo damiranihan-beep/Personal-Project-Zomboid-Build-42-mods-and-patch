@@ -1,11 +1,11 @@
 name=Homemade Suppressors for Guns of Marz
 id=GOM_HomemadeSuppressors
-version=1.37
-description=Balanced homemade suppressors plus Guns of Marz compatibility/UI fixes for Build 42.20.2. Fix 3.7 moves MountOn hiding to a safe tooltip-layout cleaner and fixes suppressor visuals/tooltips.
+version=1.39
+description=Balanced homemade suppressors plus Guns of Marz compatibility for Build 42.20.2. Fix 3.9 applies the agreed -45/-55/-65 noise tiers, range and critical penalties, consistent suppressed last-shot audio, and guaranteed plastic break recovery.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
 modversion=2
 versionMin=42.20.2
-require=MarzGuns,WeaponAttachmentTooltipCleaner
-loadModAfter=HBVCEFb42,SWMG,MarzGuns,WeaponAttachmentTooltipCleaner
+require=MarzGuns
+loadModAfter=HBVCEFb42,SWMG,MarzGuns

@@ -1,3 +1,14 @@
+REALISTIC COMBAT — FIX 3.4
+Дата: 14.08.2026
+
+- Вторая/левая рука больше НИКОГДА не должна запускать close-kill / finisher.
+- Перед off-hand pressedAttack временно убирается CloseKillMove только у оружия второй руки.
+- AttackVars.bCloseKill дополнительно принудительно держится false в защищённых pcall-точках.
+- После окончания off-hand удара исходный CloseKillMove оружия возвращается.
+- Правая/основная рука не меняется и сохраняет ванильные добивания.
+- Сохранён Fix 3.3: травмы левой руки участвуют в combat-speed и AttackVars.clear не вызывается.
+- Добавлен loadModAfter для FancyHandworkB42_19 и FH.
+
 REALISTIC COMBAT — FIX 3.3
 Дата: 14.08.2026
 Цель: Project Zomboid Build 42.20.2
