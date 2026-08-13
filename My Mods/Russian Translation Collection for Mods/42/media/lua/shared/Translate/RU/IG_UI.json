@@ -1201,5 +1201,6 @@
   "IGUI_HotbarAttachment_Vest_Left": "Жилет слева",
   "IGUI_HotbarAttachment_Vest_Right": "Жилет справа",
   "IGUI_HotbarAttachment_HuntingVestLeft": "Жилет слева",
-  "IGUI_HotbarAttachment_HuntingVestRight": "Жилет справа"
+  "IGUI_HotbarAttachment_HuntingVestRight": "Жилет справа",
+  "IGUI_CraftingCategories_Papermaking": "Изготовление бумаги"
 }

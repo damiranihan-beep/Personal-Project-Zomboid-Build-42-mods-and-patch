@@ -52,6 +52,41 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.70),
     },
+    ["MarzGuns.HomemadePlasticSuppressor"] = {
+        SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80), SF.Set("SwingSound","CapGunRifleShoot"),
+    },
+    ["MarzGuns.HomemadeCanSuppressor"] = {
+        SF.Multiply("SoundRadius",0.45), SF.Multiply("SoundVolume",0.45),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80), SF.Set("SwingSound","CapGunRifleShoot"),
+    },
+    ["MarzGuns.HomemadePipeSuppressor"] = {
+        SF.Multiply("SoundRadius",0.35), SF.Multiply("SoundVolume",0.35),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80), SF.Set("SwingSound","CapGunRifleShoot"),
+    },
+    ["MarzGuns.HomemadePlasticSuppressor_Critical"] = {
+        SF.Multiply("SoundRadius",0.75), SF.Multiply("SoundVolume",0.75),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80), SF.Multiply("MaxRange",0.80),
+    },
+    ["MarzGuns.HomemadeCanSuppressor_Critical"] = {
+        SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80), SF.Multiply("MaxRange",0.80),
+    },
+    ["MarzGuns.HomemadePipeSuppressor_Critical"] = {
+        SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80), SF.Multiply("MaxRange",0.80),
+    },
+    ["MarzGuns.HomemadeCanSuppressor_Broken"] = {
+        SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
+        SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90), SF.Multiply("MaxRange",0.70),
+    },
+    ["MarzGuns.HomemadePipeSuppressor_Broken"] = {
+        SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
+        SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90), SF.Multiply("MaxRange",0.70),
+    },
 })
 
 -- Preserve GoM bayonet/muzzle incompatibility without rewriting its Bayonets.lua.
@@ -61,7 +96,10 @@ if okB and Bayonet and Bayonet.SetExclusives then
         {"MarzGuns.K98_Bayonet_Attachment","MarzGuns.M5_Bayonet_Attachment","MarzGuns.M9_Bayonet_Attachment"},
         {"HomemadeSuppressors.HomemadePlasticSuppressor","HomemadeSuppressors.HomemadePlasticSuppressor_Critical",
          "HomemadeSuppressors.HomemadeCanSuppressor","HomemadeSuppressors.HomemadeCanSuppressor_Critical","HomemadeSuppressors.HomemadeCanSuppressor_Broken",
-         "HomemadeSuppressors.HomemadePipeSuppressor","HomemadeSuppressors.HomemadePipeSuppressor_Critical","HomemadeSuppressors.HomemadePipeSuppressor_Broken"}
+         "HomemadeSuppressors.HomemadePipeSuppressor","HomemadeSuppressors.HomemadePipeSuppressor_Critical","HomemadeSuppressors.HomemadePipeSuppressor_Broken",
+         "MarzGuns.HomemadePlasticSuppressor","MarzGuns.HomemadePlasticSuppressor_Critical",
+         "MarzGuns.HomemadeCanSuppressor","MarzGuns.HomemadeCanSuppressor_Critical","MarzGuns.HomemadeCanSuppressor_Broken",
+         "MarzGuns.HomemadePipeSuppressor","MarzGuns.HomemadePipeSuppressor_Critical","MarzGuns.HomemadePipeSuppressor_Broken"}
     )
 end
 

@@ -7,7 +7,11 @@ local function add(weapon,part,model)
     if not sm then return end
     local script=sm:getItem("MarzGuns."..weapon)
     if not script or not script.DoParam then return end
-    pcall(function() script:DoParam("ModelWeaponPart = MarzGuns."..part.." MarzGuns."..model.." canon canon") end)
+    pcall(function() script:DoParam("ModelWeaponPart = HomemadeSuppressors."..part.." HomemadeSuppressors."..model.." canon canon") end)
+    -- Older saves may still contain the integrated MarzGuns.Homemade* IDs.
+    if sm:getItem("MarzGuns."..part) then
+        pcall(function() script:DoParam("ModelWeaponPart = MarzGuns."..part.." HomemadeSuppressors."..model.." canon canon") end)
+    end
 end
 local function addSet(list,kind)
     for i=1,#list do

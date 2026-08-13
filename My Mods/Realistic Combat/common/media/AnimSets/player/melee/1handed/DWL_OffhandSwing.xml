@@ -30,7 +30,7 @@
     </m_Events>
     <m_Events>
         <m_EventName>AttackCollisionCheck</m_EventName>
-        <m_TimePc>0.60</m_TimePc>
+        <m_TimePc>0.25</m_TimePc>
         <m_ParameterValue>MeleeSwing</m_ParameterValue>
     </m_Events>
     <m_Events>

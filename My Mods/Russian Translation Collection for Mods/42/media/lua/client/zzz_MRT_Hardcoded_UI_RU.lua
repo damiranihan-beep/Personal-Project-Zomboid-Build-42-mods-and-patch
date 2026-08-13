@@ -593,6 +593,18 @@ local MRT_LTP_RECIPE_NAMES = {
     ["Make Jar of Preserved Food (Pemmican)"] = getText("UI_MRT_Runtime_018"),
     ["Open Jar of Preserved Food (Animal Fat)"] = getText("UI_MRT_Runtime_019"),
     ["Open Jar of Preserved Food (Pemmican)"] = getText("UI_MRT_Runtime_020"),
+
+    ["Open Box of Food Jars"] = getText("UI_MRT_Runtime_029"),
+    ["Open Box of Jars Labeled)(Empty)"] = getText("UI_MRT_Runtime_030"),
+    ["Open Box of Jars (Labeled)"] = getText("UI_MRT_Runtime_031"),
+    ["Open Box of Food Jars (Preserved)"] = getText("UI_MRT_Runtime_032"),
+    ["Open Box of Food Jars (Uncooked)"] = getText("UI_MRT_Runtime_033"),
+    ["Pack 6 Jars of Cooked Food in Box"] = getText("UI_MRT_Runtime_034"),
+    ["Make Epoxy"] = getText("UI_MRT_Runtime_035"),
+    ["Make Glass Salt Container (Empty)"] = getText("UI_MRT_Runtime_036"),
+    ["Make Wood Glue"] = getText("UI_MRT_Runtime_037"),
+    ["Reduce Animal Fat"] = getText("UI_MRT_Runtime_038"),
+    ["Reduce Fish Fat"] = getText("UI_MRT_Runtime_039"),
 }
 
 local function MRT_translateLTPRecipeName(value)
@@ -665,6 +677,8 @@ end
 -- from Lua instead of localization files. Translate only these exact labels when
 -- ISContextMenu.addOption() receives them; no per-frame scanning is needed.
 local MRT_WORLD_CONTEXT_KEYS = {
+    ["Unequip All"] = "UI_MRT_UnequipAll",
+    ["Check Food Expiry"] = "UI_LTP_CheckExpiry",
     ["BarricadedWorld"] = "UI_MRT_Runtime_023",
     ["Barricaded World"] = "UI_MRT_Runtime_023",
     ["Enable protection for Door"] = "UI_MRT_Runtime_024",

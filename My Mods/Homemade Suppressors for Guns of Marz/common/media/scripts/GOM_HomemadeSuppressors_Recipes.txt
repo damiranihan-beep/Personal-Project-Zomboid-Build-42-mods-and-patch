@@ -10,7 +10,7 @@ module HomemadeSuppressors
         OnCreate = GOMHomemade.OnCreatePlastic,
         inputs
         {
-            item 2 [Base.WaterBottle;Base.PopBottle;Base.PopBottleRare;Base.Sportsbottle;Base.JuiceCranberry;Base.JuiceFruitpunch;Base.JuiceGrape;Base.JuiceLemon;Base.JuiceOrange;Base.JuiceTomato;Base.Bleach;Base.CleaningLiquid2;Base.HairDyeCommon;Base.HairDyeUncommon;Base.HairDyeRare;Base.IndustrialDye] flags[IsEmpty;ItemCount;IsExclusive],
+            item 2 [Base.WaterBottle;Base.PopBottle;Base.PopBottleRare;Base.Sportsbottle;Base.JuiceCranberry;Base.JuiceFruitpunch;Base.JuiceGrape;Base.JuiceLemon;Base.JuiceOrange;Base.JuiceTomato;Base.Bleach;Base.CleaningLiquid2;Base.HairDyeCommon;Base.HairDyeUncommon;Base.HairDyeRare;Base.IndustrialDye;Base.Disinfectant] flags[IsEmpty;ItemCount;IsExclusive],
             item 8 [Base.RippedSheets;Base.DenimStrips] flags[IsExclusive],
             item 2 [Base.DuctTape;Base.Scotchtape] flags[IsExclusive],
             item 1 tags[Hammer;ClubHammer] mode:keep,
@@ -37,7 +37,7 @@ module HomemadeSuppressors
             item 4 [Base.LeatherStrips],
             item 1 tags[Hammer;ClubHammer] mode:keep,
             item 1 tags[MetalworkingPliers] mode:keep,
-            item 1 [Base.File] mode:keep,
+            item 1 tags[base:file] mode:keep flags[MayDegradeLight],
         }
         outputs
         {
@@ -56,11 +56,12 @@ module HomemadeSuppressors
         inputs
         {
             item 1 [Base.MetalPipe;Base.LeadPipe] flags[IsExclusive],
-            item 4 [Base.ScrapMetal],
+            item 4 [Base.ScrapMetal;Base.AluminumScrap;Base.BrassScrap;Base.CopperScrap;Base.IronScrap;Base.SteelScrap;Base.UnusableMetal] flags[IsExclusive;ItemCount],
+            item 5 [Base.SteelWool],
             item 2 [Base.BlowTorch],
             item 1 tags[Hammer;ClubHammer] mode:keep,
             item 1 tags[MetalworkingPliers] mode:keep,
-            item 1 [Base.File] mode:keep,
+            item 1 tags[base:file] mode:keep flags[MayDegradeLight],
             item 1 tags[WeldingMask] mode:keep,
         }
         outputs

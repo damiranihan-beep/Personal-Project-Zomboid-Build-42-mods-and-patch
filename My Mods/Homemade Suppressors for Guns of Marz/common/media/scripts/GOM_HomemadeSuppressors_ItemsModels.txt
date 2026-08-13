@@ -35,7 +35,6 @@ module HomemadeSuppressors
         Weight = 0.20,
         WeightModifier = 0.20,
         ConditionMax = 30,
-        MountOn = MarzGuns.M92FS;MarzGuns.M93R;MarzGuns.HIPOWER;MarzGuns.P226;MarzGuns.M1911;MarzGuns.USP;MarzGuns.DEAGLE;MarzGuns.VP70M,
         PartType = Canon,
         Tooltip = Tooltip_HomemadePlasticSuppressorBroken,
         WorldStaticModel = HomemadeSuppressors.HomemadePlasticSuppressor_Broken,
@@ -75,7 +74,6 @@ module HomemadeSuppressors
         Weight = 0.50,
         WeightModifier = 0.50,
         ConditionMax = 80,
-        MountOn = MarzGuns.M92FS;MarzGuns.M93R;MarzGuns.HIPOWER;MarzGuns.P226;MarzGuns.M1911;MarzGuns.USP;MarzGuns.DEAGLE;MarzGuns.VP70M;MarzGuns.THOMPSON;MarzGuns.MP5;MarzGuns.MP5A2;MarzGuns.MP5K;MarzGuns.TEC9;MarzGuns.MAC10;MarzGuns.W1873_CARBINE,
         PartType = Canon,
         Tooltip = Tooltip_HomemadeCanSuppressorBroken,
         WorldStaticModel = HomemadeSuppressors.HomemadeCanSuppressor_Broken,
@@ -115,7 +113,6 @@ module HomemadeSuppressors
         Weight = 1.15,
         WeightModifier = 1.15,
         ConditionMax = 160,
-        MountOn = MarzGuns.M92FS;MarzGuns.M93R;MarzGuns.HIPOWER;MarzGuns.P226;MarzGuns.M1911;MarzGuns.USP;MarzGuns.DEAGLE;MarzGuns.VP70M;MarzGuns.THOMPSON;MarzGuns.MP5;MarzGuns.MP5A2;MarzGuns.MP5K;MarzGuns.TEC9;MarzGuns.MAC10;MarzGuns.W1873_CARBINE;MarzGuns.M16A1;MarzGuns.M16A2;MarzGuns.M16A2_M203;MarzGuns.M16A3;MarzGuns.AR15;MarzGuns.FNC;MarzGuns.CAR15;MarzGuns.XM177;MarzGuns.M4A1;MarzGuns.M4;MarzGuns.G36C;MarzGuns.G36;MarzGuns.AK74;MarzGuns.AKS74U;MarzGuns.FAMAS;MarzGuns.AK47;MarzGuns.M14;MarzGuns.M1_GARAND;MarzGuns.FAL;MarzGuns.G3;MarzGuns.MOSIN;MarzGuns.M24;MarzGuns.M1903;MarzGuns.W1894;MarzGuns.M1895;MarzGuns.W1873;MarzGuns.M60;MarzGuns.BAR;MarzGuns.SVD;MarzGuns.SKS;MarzGuns.PSG1,
         PartType = Canon,
         Tooltip = Tooltip_HomemadePipeSuppressorBroken,
         WorldStaticModel = HomemadeSuppressors.HomemadePipeSuppressor_Broken,
@@ -124,31 +121,31 @@ module HomemadeSuppressors
     model HomemadePlasticSuppressor
     {
         mesh = weapons/parts/suppressors|Shh9_Suppressor,
-        texture = weapons/parts/suppressors/HomemadePlasticSuppressor,
+        texture = weapons/parts/suppressors/Shh9_Suppressor,
     }
     model HomemadePlasticSuppressor_Broken
     {
         mesh = weapons/parts/suppressors|Shh9_Suppressor,
-        texture = weapons/parts/suppressors/HomemadePlasticSuppressor_Broken,
+        texture = weapons/parts/suppressors/Shh9_Suppressor,
     }
     model HomemadeCanSuppressor
     {
         mesh = weapons/parts/suppressors|M&P_Suppressor,
-        texture = weapons/parts/suppressors/HomemadeCanSuppressor,
+        texture = weapons/parts/suppressors/M&P_Suppressor,
     }
     model HomemadeCanSuppressor_Broken
     {
         mesh = weapons/parts/suppressors|M&P_Suppressor,
-        texture = weapons/parts/suppressors/HomemadeCanSuppressor_Broken,
+        texture = weapons/parts/suppressors/M&P_Suppressor,
     }
     model HomemadePipeSuppressor
     {
         mesh = weapons/parts/suppressors|PBS-1_Suppressor,
-        texture = weapons/parts/suppressors/HomemadePipeSuppressor,
+        texture = weapons/parts/suppressors/PBS-1_Suppressor,
     }
     model HomemadePipeSuppressor_Broken
     {
         mesh = weapons/parts/suppressors|PBS-1_Suppressor,
-        texture = weapons/parts/suppressors/HomemadePipeSuppressor_Broken,
+        texture = weapons/parts/suppressors/PBS-1_Suppressor,
     }
 }

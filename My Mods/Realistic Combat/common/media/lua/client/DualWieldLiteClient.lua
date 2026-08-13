@@ -1,4 +1,4 @@
--- Realistic Combat - Fix 3 - Build 42.20.2
+-- Realistic Combat - Fix 3.3 - Build 42.20.2
 -- Off-hand attacks are real SwipeStatePlayer attacks.  The mod only chooses
 -- which equipped one-handed melee weapon the vanilla combat pipeline sees.
 
@@ -19,6 +19,7 @@ local function stateFor(player)
             strainBefore = nil,
             strainTransferPending = false,
             strainTransferDelay = 0,
+            armSlotsSaved = nil,
             nextPhase = nil,
             launchPending = false,
             launchDelay = 0,
@@ -198,15 +199,26 @@ local function restoreArmBodyPartSlots(player, saved)
     end
 end
 
-local function pressedAttackUsingLeftArm(player)
-    local saved = swapArmBodyPartSlots(player)
+local function restorePendingArmSlotSwap(player, s)
+    if not s or not s.armSlotsSaved then return end
+    restoreArmBodyPartSlots(player, s.armSlotsSaved)
+    s.armSlotsSaved = nil
+end
+
+local function pressedAttackUsingLeftArm(player, s)
+    -- Keep the left-arm substitution alive until OnWeaponSwing. In B42.20.2
+    -- combat speed/weapon setup can finish after pressedAttack() has returned.
+    -- Restoring immediately here made off-hand attacks ignore left-arm injuries.
+    restorePendingArmSlotSwap(player, s)
+    s.armSlotsSaved = swapArmBodyPartSlots(player)
+
     local ok, err = pcall(function()
         player:pressedAttack()
     end)
-    restoreArmBodyPartSlots(player, saved)
 
     if not ok then
-        print("[DualWieldingLite] off-hand pressedAttack failed: " .. tostring(err))
+        restorePendingArmSlotSwap(player, s)
+        print("[RealisticCombat] off-hand pressedAttack failed: " .. tostring(err))
         return false
     end
     return true
@@ -224,12 +236,14 @@ local function restoreHands(player, s)
 end
 
 local function cancelOffhandLaunch(player, s)
+    restorePendingArmSlotSwap(player, s)
     restoreHands(player, s)
     releaseMeleeInput(player, s)
     player:setUseHandWeapon(s.primary)
     player:setInitiateAttack(false)
     player:setAttackStarted(false)
-    player:getAttackVars():clear()
+    -- Do not index/call AttackVars.clear here. In B42.20.2 getAttackVars()
+    -- is Java userdata and the old :clear() access throws before Lua can guard it.
     clearAnimFlags(player)
 
     s.phase = nil
@@ -237,6 +251,7 @@ local function cancelOffhandLaunch(player, s)
     s.primary = nil
     s.secondary = nil
     s.offhandWeapon = nil
+    s.armSlotsSaved = nil
     s.nextPhase = nil
     s.launchPending = false
     s.launchDelay = 0
@@ -267,7 +282,7 @@ local function startOffhandAttack(player)
 
     -- Let vanilla calculate the off-hand attack with the left arm's actual
     -- wounds/pain/stiffness substituted into its hard-coded attack-arm slots.
-    if not pressedAttackUsingLeftArm(player) then
+    if not pressedAttackUsingLeftArm(player, s) then
         cancelOffhandLaunch(player, s)
         return false
     end
@@ -323,6 +338,10 @@ local function onWeaponSwing(attacker, weapon)
     -- player's actual hand layout before the attack animation is rendered, then
     -- keep useHandWeapon pinned to the off-hand weapon for sound/collision/hit.
     if s.phase == "offhand" and s.swapPending and weapon == s.offhandWeapon then
+        -- At this point SwipeStatePlayer has already selected/calculated the
+        -- off-hand attack. Restore the real body-part layout before normal UI
+        -- and damage updates continue.
+        restorePendingArmSlotSwap(attacker, s)
         restoreHands(attacker, s)
         attacker:setUseHandWeapon(s.offhandWeapon)
         attacker:setVariable("DWL_Offhand", true)
@@ -399,6 +418,7 @@ local function onWeaponSwingHitPoint(attacker, weapon)
 end
 
 local function resetState(player, s)
+    restorePendingArmSlotSwap(player, s)
     if s.swapPending then
         restoreHands(player, s)
     end
@@ -413,6 +433,7 @@ local function resetState(player, s)
     s.primary = nil
     s.secondary = nil
     s.offhandWeapon = nil
+    s.armSlotsSaved = nil
     s.lastWasShove = false
     s.lastWasGround = false
     s.nextPhase = nil
@@ -550,4 +571,4 @@ Events.OnWeaponSwingHitPoint.Add(onWeaponSwingHitPoint)
 Events.OnPlayerAttackFinished.Add(onPlayerAttackFinished)
 Events.OnPlayerUpdate.Add(onPlayerUpdate)
 
-print("[RealisticCombat] Fix 3 loaded - strict two-handed rule + vanilla alternating attack chain")
+print("[RealisticCombat] Fix 3.3 loaded - left-arm injury speed + safe offhand cancel")

@@ -17,6 +17,7 @@ local MRT_PAGE_NAMES = {
     TacHold = "UI_MRT_Page_TacHold",
     TacPHold = "UI_MRT_Page_TacPHold",
     RabenRabo_DWA = "UI_MRT_Page_DualWieldingAttacks",
+    LTP_Extended = "UI_LTP_ModOptions_Title",
 }
 
 local MRT_GLOBAL_TEXT = {
@@ -89,6 +90,11 @@ local function MRT_patchGlobalDisplayFields(entry)
 end
 
 local MRT_PATCHES = {
+    LTP_Extended = {
+        byId = {
+            expiryPopupDuration = { name = "UI_LTP_PopupDuration", tooltip = "UI_LTP_PopupDuration_Tooltip" },
+        },
+    },
     MoodlesInLua = {
         byId = {
             MoodleBorderSet = { name = "UI_MRT_MIL_BorderPack", tooltip = "UI_MRT_MIL_BorderPack_Tooltip", values = { "UI_MRT_Value_Default" } },

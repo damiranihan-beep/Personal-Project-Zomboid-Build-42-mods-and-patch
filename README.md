@@ -2,11 +2,24 @@
 
 Personal Project Zomboid Build 42 mod collection.
 
-## Included projects
+Target game version: **Build 42.20.2**
+Repository package updated: **14.08.2026**
 
-1. **Russian Translation Collection for Mods** — consolidated Russian translations and localization fixes for selected mods.
-2. **Homemade Suppressors for Guns of Marz** — balanced craftable suppressors for the Guns of Marz weapon mod.
-3. **Realistic Combat** — lightweight dual-wield melee combat using the vanilla Build 42 combat pipeline.
-4. **Smoking Universal Patch 42.20.2** — compatibility patch for **Smoking Sounds Overhaul** and **Where Are My Zang Cigs**. It preserves the smoking sound integration on Build 42.20.2 and replaces the older **Where Are My Zang Cigs 42.13+ patch**. The target behavior also includes smoking directly from a cigarette pack and returning the pack and lighter to their original container; the current **v1.3 Lite** still needs the direct-from-pack context-menu/action path fixed.
+## My Mods
+1. **Homemade Suppressors for Guns of Marz — Fix 3.7**
+2. **Realistic Combat — Fix 3.3**
+3. **Russian Translation Collection for Mods — 14.08.2026**
 
-Each mod keeps its original stable `id=` for compatibility. Every project contains a Russian `CHANGELOG_RU.txt` with the current mechanics, balance changes, and maintenance notes.
+## My Patch Mods
+1. **SmokingUniversalPatch — v1.4.3**
+2. **Weapon Attachment Tooltip Cleaner — v1.0**
+
+## Realistic Combat Fix 3.3
+- left-arm injuries stay substituted through the vanilla off-hand combat-speed setup;
+- Java `AttackVars.clear()` is no longer accessed during cancellation;
+- stable mod id remains `DualWieldingLite_B42` for save/load compatibility.
+
+## Tracking
+- `CURRENT_FIXES_AND_TESTS_RU.txt`
+- `CHECK_AFTER_INSTALL_RU.txt`
+- `OTHER_MOD_PATCH_QUEUE_RU.txt`

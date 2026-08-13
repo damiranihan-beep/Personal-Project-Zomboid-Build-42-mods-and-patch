@@ -123,5 +123,8 @@
   "ContextMenu_VehicleStartEngineManual": "Запустить двигатель вручную",
   "ContextMenu_WearDown": "Опустить одежду",
   "ContextMenu_WearUp": "Поднять одежду",
-  "ContextMenu_Wooden_Pantone": "Деревянный понтон"
+  "ContextMenu_Wooden_Pantone": "Деревянный понтон",
+  "ContextMenu_SmokeFromCigarettePack": "Курить с пачки сигарет",
+  "ContextMenu_UnequipAll": "Снять всё",
+  "ContextMenu_Unequip_All": "Снять всё"
 }

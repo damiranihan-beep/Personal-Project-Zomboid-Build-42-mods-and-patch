@@ -1,0 +1,10 @@
+name=Weapon Attachment Tooltip Cleaner
+id=WeaponAttachmentTooltipCleaner
+version=1.0
+modversion=2
+versionMin=42.20.2
+description=Safely replaces long horizontal MountOn compatibility text with a vertical list for weapon attachments. Does not mutate item/script MountOn data while rendering tooltips.
+poster=poster.png
+icon=icon.png
+author=Personal Mod Collection
+loadModAfter=HBVCEFb42,MarzGuns

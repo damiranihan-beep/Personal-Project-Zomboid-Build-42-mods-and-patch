@@ -15,6 +15,20 @@ for kind,c in pairs(CFG) do
     TYPE_STATE[c.brokenType]={kind=kind,state="broken"}
 end
 
+-- Compatibility with items created by the older integrated GoM patch.
+-- Keeping these IDs recognized means an existing save does not need a new world
+-- only because the standalone mod moved the items to HomemadeSuppressors.*.
+local LEGACY = {
+    plastic={baseType="MarzGuns.HomemadePlasticSuppressor",criticalType="MarzGuns.HomemadePlasticSuppressor_Critical",brokenType="MarzGuns.HomemadePlasticSuppressor_Broken"},
+    can={baseType="MarzGuns.HomemadeCanSuppressor",criticalType="MarzGuns.HomemadeCanSuppressor_Critical",brokenType="MarzGuns.HomemadeCanSuppressor_Broken"},
+    pipe={baseType="MarzGuns.HomemadePipeSuppressor",criticalType="MarzGuns.HomemadePipeSuppressor_Critical",brokenType="MarzGuns.HomemadePipeSuppressor_Broken"},
+}
+for kind,c in pairs(LEGACY) do
+    TYPE_STATE[c.baseType]={kind=kind,state="working",legacy=true}
+    TYPE_STATE[c.criticalType]={kind=kind,state="critical",legacy=true}
+    TYPE_STATE[c.brokenType]={kind=kind,state="broken",legacy=true}
+end
+
 local function sync(player,weapon)
     if okAnim and Animations and Animations.CallSyncHandWeaponFields then
         pcall(Animations.CallSyncHandWeaponFields,player,weapon)
