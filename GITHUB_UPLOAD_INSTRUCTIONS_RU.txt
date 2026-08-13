@@ -1,0 +1,13 @@
+ОБНОВЛЕНИЕ РЕПОЗИТОРИЯ — ВАЖНО
+
+1. Не накладывать этот архив поверх старых пяти папок с сохранением лишних файлов.
+2. Полностью заменить:
+   My Mods/Homemade Suppressors for Guns of Marz
+   My Mods/Realistic Combat
+   My Mods/Russian Translation Collection for Mods
+   My Patch Mods/SmokingUniversalPatch
+   My Patch Mods/Weapon Attachment Tooltip Cleaner
+3. Особенно у WATC должен остаться только один client Lua:
+   WeaponAttachmentTooltipCleaner.lua
+   Старого ZZZ_WeaponAttachmentTooltipCleaner.lua быть не должно.
+4. После замены обновить корневые README и отчёты из архива.

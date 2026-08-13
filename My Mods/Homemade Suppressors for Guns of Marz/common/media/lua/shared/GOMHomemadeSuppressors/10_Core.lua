@@ -1,4 +1,4 @@
--- GOM Homemade Suppressors B42.20.2
+-- GOM Homemade Suppressors Fix 3.10 - B42.20.2
 GOMHomemade = GOMHomemade or {}
 local okAnim, Animations = pcall(require, "WeaponSystems/Utils/Animations")
 local RNG = newrandom()
@@ -157,7 +157,22 @@ local function onWeaponSwingAudio(attacker,weapon)
     enforceSuppressorSound(weapon)
 end
 Events.OnWeaponSwing.Add(onWeaponSwingAudio)
+
+-- Automatic-fire fail-safe: other gun/audio scripts may restore the gun's native
+-- SwingSound between rounds of one held burst. Reassert the active suppressor
+-- sound at the global tick boundary as well as OnPlayerUpdate/OnWeaponSwing.
+local function enforcePlayerWeaponSound(player)
+    if not player then return end
+    local held=player:getPrimaryHandItem()
+    if held and instanceof(held,"HandWeapon") then enforceSuppressorSound(held) end
+end
+local function onTickSuppressorSound()
+    local p=getPlayer and getPlayer() or nil
+    enforcePlayerWeaponSound(p)
+end
+Events.OnTick.Add(onTickSuppressorSound)
 local function processShot(player,weapon)
+    enforceSuppressorSound(weapon)
     if not player or not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
     local part=getCanon(weapon); if not part then return end
     local info=TYPE_STATE[part:getFullType()]; if not info or info.state=="broken" then return end
@@ -206,4 +221,4 @@ local function periodic(player)
     end
 end
 Events.OnPlayerUpdate.Add(periodic)
-print("[GOM HS] Fix 3.9 core loaded for B42.20.2")
+print("[GOM HS] Fix 3.10 core loaded - automatic-fire suppressor fail-safe active")

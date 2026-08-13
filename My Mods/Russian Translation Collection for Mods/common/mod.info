@@ -1,8 +1,10 @@
 name=Russian Translation Collection for Mods
 id=MyRussianTranslations
-description=Russian translations for selected Project Zomboid Build 42 mods. Enable after the original mods.
+description=Russian translations for Build 42.20.2. Load last.
 poster=poster.png
 icon=icon.png
 author=Personal Translation Collection
-modversion=2
-versionMin=42.0
+modversion=4.4.0
+versionMin=42.20.2
+loadAfter=MarzGuns,MarzGunsSoundOverhaul,GOM_HomemadeSuppressors,DualWieldingLite_B42,SmokingUniversalPatchB42202,WeaponAttachmentTooltipCleaner,LongTermPreservationExtended,LongTermPreservationExtendedUI
+loadLast=on

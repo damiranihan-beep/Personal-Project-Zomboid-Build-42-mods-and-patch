@@ -355,24 +355,24 @@ MarzGuns_TooltipsTable.tooltipsPergun = {
         getText("UI_MRT_MarzTooltip_068")
     },
     ["MarzGuns.PL4_Sight"] = {
-        getText("UI_HS_Optic_G1"),
-        getText("UI_HS_Optic_G1_Stats"),
-        getText("UI_HS_Optic_G1_Range")
+        "UI_HS_Optic_G1",
+        "UI_HS_Optic_G1_Stats",
+        "UI_HS_Optic_G1_Range"
     },
     ["MarzGuns.PS1_Sight"] = {
-        getText("UI_HS_Optic_G2"),
-        getText("UI_HS_Optic_G2_Stats"),
-        getText("UI_HS_Optic_G2_Range")
+        "UI_HS_Optic_G2",
+        "UI_HS_Optic_G2_Stats",
+        "UI_HS_Optic_G2_Range"
     },
     ["MarzGuns.PM2_Sight"] = {
-        getText("UI_HS_Optic_G3"),
-        getText("UI_HS_Optic_G3_Stats"),
-        getText("UI_HS_Optic_G3_Range")
+        "UI_HS_Optic_G3",
+        "UI_HS_Optic_G3_Stats",
+        "UI_HS_Optic_G3_Range"
     },
     ["MarzGuns.PRL1_Scope"] = {
-        getText("UI_HS_Optic_G4"),
-        getText("UI_HS_Optic_G4_Stats"),
-        getText("UI_HS_Optic_G4_Range")
+        "UI_HS_Optic_G4",
+        "UI_HS_Optic_G4_Stats",
+        "UI_HS_Optic_G4_Range"
     },
 
     ["MarzGuns.Stub_Foregrip"] = {

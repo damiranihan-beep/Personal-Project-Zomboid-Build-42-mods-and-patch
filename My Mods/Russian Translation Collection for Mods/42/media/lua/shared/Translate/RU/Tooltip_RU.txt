@@ -94,4 +94,10 @@ Tooltip_RU = {
     Tooltip_HomemadePipeSuppressor = "Тяжёлый самодельный глушитель из металлической трубы.",
     Tooltip_HomemadePipeSuppressorCritical = "Почти сломан: следующий выстрел станет последним.",
     Tooltip_HomemadePipeSuppressorBroken = "Сломан, не ремонтируется. Если остался на оружии, мешает стрельбе.",
+
+    Tooltip_item_SaltWastage = "Расходует больше соли; лучше наполнить пустую ёмкость для соли.",
+    Tooltip_item_JarToPreserveLonger = "Для более долгого хранения можно законсервировать в банке.",
+    Tooltip_item_MashedGarlicMash = "Используется для приготовления измельчённого чеснока.",
+    Tooltip_item_RefrigerateOnceOpened = "После открытия храните в холодильнике или морозильнике.",
+    Tooltip_item_UseToLabelJars = "Используется для подписывания подходящих банок.",
 }

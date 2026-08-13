@@ -1,44 +1,11 @@
-PROJECT ZOMBOID — ПРОВЕРКА ПОСЛЕ УСТАНОВКИ
-Дата: 14.08.2026
-Пакет: Fix 3.7 + Weapon Attachment Tooltip Cleaner 1.0
+PROJECT ZOMBOID BUILD 42.20.2 — FINAL LIVE CHECK
 
-Проверить после замены всех 5 модов:
-
-1. Самодельный глушитель — ERROR:
-   - навести курсор на глушитель и держать 10–20 секунд;
-   - счётчик ERROR не должен расти;
-   - горизонтальной длинной строки «Можно закрепить на ...» быть не должно;
-   - совместимые модели должны идти только аккуратным списком вниз.
-
-2. Самодельный глушитель — внешний вид:
-   - пластиковый использует базу Shh9 из Guns of Marz;
-   - баночный использует базу M&P;
-   - трубный использует базу PBS-1;
-   - проверить как предмет и установленным на оружие.
-
-3. Текущее сохранение:
-   - новую игру НЕ начинать специально;
-   - проверить уже существующий старый глушитель;
-   - затем скрафтить новый и сравнить tooltip/модель.
-
-4. Другие насадки Guns of Marz:
-   - длинный MountOn не должен тянуть tooltip вправо;
-   - конкретная совместимость должна идти вниз;
-   - у магазина не должно быть общей строки «Пистолеты и револьверы», если есть точный список моделей.
-
-5. Пачка сигарет в основном инвентаре и в рюкзаке:
-   - «Взять сигарету» может оставаться;
-   - дополнительно должно быть «Курить с пачки сигарет»;
-   - возврат пачки/зажигалки выполняет отдельный мод, не SmokingUniversalPatch.
-
-6. Несколько частично использованных зажигалок одного типа:
-   - должно появиться штатное «Объединить»;
-   - Base.Lighter и Base.LighterDisposable.
-
-7. Прицелы PL-4 / PS-1 / PM-2 / PRL-1:
-   - I: +1%; II: +3%; III: +6%; IV: +10%;
-   - точность, крит и дальность обзора растут вместе.
-
-8. Трубный глушитель:
-   - Base.Aluminum и Base.AluminumFragments НЕ должны быть ингредиентами;
-   - лом (включая AluminumScrap) остаётся допустим.
+1. Automatic fire: full burst with plastic/can/pipe suppressors. No normal unsuppressed shot.
+2. Last critical shot stays suppressed.
+3. Break plastic: broken item is on current square; if placement fails it is in inventory.
+4. Hover GoM magazine: ammo count/type/weight remain visible; no horizontal "Можно закрепить на"; exact weapon list is vertical.
+5. Hover rail/scope/suppressor: no raw UI_HS_* keys and no ERROR growth.
+6. PL-4 / PS-1 / PM-2 / PRL-1: +1 / +3 / +6 / +10 to hit, crit and sight range.
+7. Realistic Combat: injured left arm slows off-hand; off-hand never finisher.
+8. Smoking: "Курить с пачки сигарет" works from backpack; lighter merge works; pack return remains separate mod.
+9. Fresh console: search ERROR, WATC, GOM HS, UnknownFormatConversionException.

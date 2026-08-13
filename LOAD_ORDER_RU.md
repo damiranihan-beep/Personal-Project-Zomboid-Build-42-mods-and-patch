@@ -1,15 +1,11 @@
-# Рекомендуемый автоматический load order
+# Load order — Build 42.20.2
 
-Настройки добавлены в `mod.info`, чтобы Mod Load Order Sorter / Mod Manager мог сам видеть зависимости.
-
-1. **Guns of Marz / его базы**
-2. **Weapon Attachment Tooltip Cleaner v1.1** — после MarzGuns и после Homemade Suppressors (фактически самый поздний tooltip wrapper оружейки)
-3. **Homemade Suppressors Fix 3.8** — после SWMG / MarzGuns
-4. **Fancy Handwork / FH**
-5. **Realistic Combat Fix 3.4** — `loadModAfter=FancyHandworkB42_19,FH`
-6. **Where Are My Zang Cigs + Smoking Sounds Overhaul**
-7. **SmokingUniversalPatch** — уже содержит loadModAfter двух оригиналов
-8. **Russian Translation Collection** — `loadLast=on` + load-after всех наших текущих проектов/основных исходников
-
-ВАЖНО: `loadModAfter` задаёт порядок, но не делает необязательные моды обязательной зависимостью.
-Поэтому Realistic Combat не получает `require=` на анимационные моды: он просто встаёт после них, если они присутствуют.
+1. SWMG / Guns of Marz
+2. MarzGunsSoundOverhaul (если включён)
+3. Weapon Attachment Tooltip Cleaner v1.2
+4. Homemade Suppressors for Guns of Marz Fix 3.10 — после GoM Sound Overhaul и WATC
+5. Fancy Handwork / FH
+6. Realistic Combat Fix 3.4
+7. Where Are My Zang Cigs + Smoking Sounds Overhaul
+8. Smoking Universal Patch 1.4.3
+9. Russian Translation Collection v4.4.0 — LAST

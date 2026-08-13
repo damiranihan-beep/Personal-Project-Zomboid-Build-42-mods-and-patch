@@ -1,19 +1,17 @@
-# Project Zomboid Mods
+# Personal Project Zomboid Build 42 Mods and Patches
 
-Target: **Build 42.20.2** — updated **14.08.2026**.
+Target: **Project Zomboid Build 42.20.2**  
+Final audited package: **2026-08-14**
 
 ## My Mods
-- Homemade Suppressors for Guns of Marz — **Fix 3.9**
+- Homemade Suppressors for Guns of Marz — **Fix 3.10**
 - Realistic Combat — **Fix 3.4**
-- Russian Translation Collection for Mods — **v4.1 / load last**
+- Russian Translation Collection for Mods — **v4.4.0**
 
 ## My Patch Mods
 - SmokingUniversalPatch — **v1.4.3**
-- Weapon Attachment Tooltip Cleaner — **v1.1**
+- Weapon Attachment Tooltip Cleaner — **v1.2**
 
-## Homemade Suppressors Fix 3.9
-- noise tiers: -45 / -55 / -65%;
-- working damage/range/crit chance: -10%;
-- critical last shot keeps suppressed audio;
-- broken can/pipe: +10% noise, -20% damage/range/critical damage;
-- broken plastic is dropped on the player's current square, with inventory fallback.
+See `FINAL_AUDIT_B42_20_2_RU.md`, `VALIDATION_FINAL_B42_20_2.txt`, and `CHECK_AFTER_INSTALL_RU.txt`.
+
+**Important when updating the existing GitHub repository:** replace the five mod folders completely, not only upload changed files. This removes stale Lua files from older WATC/tooltip fixes.

@@ -1,3 +1,9 @@
+HOMEMADE SUPPRESSORS — FIX 3.10
+- Automatic-fire sound fail-safe on swing/hit/update/tick.
+- Restored exact GoM tooltip compatibility provider.
+- Dynamic tooltip translation for raw UI_* keys.
+- Balance from Fix 3.9 unchanged.
+
 HOMEMADE SUPPRESSORS / GUNS OF MARZ — FIX 3.9
 Дата: 14.08.2026
 

@@ -1,5 +1,5 @@
 -- GOM Homemade Suppressors - standalone SWMG registrations.
--- Fix 3.9: final agreed suppressor balance for Build 42.20.2.
+-- Fix 3.10: final agreed suppressor balance for Build 42.20.2.
 local okCSA, CSA = pcall(require, "WeaponSystems/Utils/CustomStatsAttachments")
 local okSF, SF = pcall(require, "WeaponSystems/Utils/StatsFactory")
 if not okCSA or not okSF then
@@ -149,4 +149,4 @@ if okB and Bayonet and Bayonet.SetExclusives then
     )
 end
 
-print("[GOM HS] Fix 3.9 stats/exclusives registered")
+print("[GOM HS] Fix 3.10 stats/exclusives registered")
