@@ -28,17 +28,17 @@ CSA.RegisterMultipleParts({
         SF.Set("SwingSound","CapGunRifleShoot"),
     },
     ["HomemadeSuppressors.HomemadePlasticSuppressor_Critical"] = {
-        SF.Multiply("SoundRadius",0.85), SF.Multiply("SoundVolume",0.85),
-        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
-        SF.Multiply("MaxRange",0.80),
-    },
-    ["HomemadeSuppressors.HomemadeCanSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.75), SF.Multiply("SoundVolume",0.75),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
         SF.Multiply("MaxRange",0.80),
     },
-    ["HomemadeSuppressors.HomemadePipeSuppressor_Critical"] = {
+    ["HomemadeSuppressors.HomemadeCanSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
+        SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
+    },
+    ["HomemadeSuppressors.HomemadePipeSuppressor_Critical"] = {
+        SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
         SF.Multiply("MaxRange",0.80),
     },

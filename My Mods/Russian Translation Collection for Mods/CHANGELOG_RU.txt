@@ -1,3 +1,7 @@
+ФИКС 3
+- Функциональный MarzWeapons tooltip-override перенесён в Homemade Suppressors for Guns of Marz.
+- В русификаторе оставлены только переводы, чтобы не было двух конкурирующих UI-хуков.
+
 СБОРКА РУСИФИКАТОРА ДЛЯ МОДОВ — ЖУРНАЛ ИЗМЕНЕНИЙ
 Project Zomboid Build 42.20.2
 ID мода: MyRussianTranslations

@@ -1,11 +1,19 @@
 {
   "Tooltip_HomemadePlasticSuppressor": "Шум: -45%% | Урон: -20%% | Дальность стрельбы: -20%%",
-  "Tooltip_HomemadePlasticSuppressorCritical": "Шум: -15%% | Урон: -20%% | Дальность стрельбы: -20%%",
+  "Tooltip_HomemadePlasticSuppressorCritical": "Шум: -25%% | Урон: -20%% | Дальность стрельбы: -20%%",
   "Tooltip_HomemadePlasticSuppressorBroken": "Сломан и снят с оружия. Текущие модификаторы оружия: отсутствуют.",
   "Tooltip_HomemadeCanSuppressor": "Шум: -55%% | Урон: -20%% | Дальность стрельбы: -20%%",
-  "Tooltip_HomemadeCanSuppressorCritical": "Шум: -25%% | Урон: -20%% | Дальность стрельбы: -20%%",
+  "Tooltip_HomemadeCanSuppressorCritical": "Шум: -35%% | Урон: -20%% | Дальность стрельбы: -20%%",
   "Tooltip_HomemadeCanSuppressorBroken": "Сломан. Шум: +10%% | Урон: -10%% | Дальность стрельбы: -30%%",
   "Tooltip_HomemadePipeSuppressor": "Шум: -65%% | Урон: -20%% | Дальность стрельбы: -20%%",
-  "Tooltip_HomemadePipeSuppressorCritical": "Шум: -35%% | Урон: -20%% | Дальность стрельбы: -20%%",
-  "Tooltip_HomemadePipeSuppressorBroken": "Сломан. Шум: +10%% | Урон: -10%% | Дальность стрельбы: -30%%"
+  "Tooltip_HomemadePipeSuppressorCritical": "Шум: -45%% | Урон: -20%% | Дальность стрельбы: -20%%",
+  "Tooltip_HomemadePipeSuppressorBroken": "Сломан. Шум: +10%% | Урон: -10%% | Дальность стрельбы: -30%%",
+  "Tooltip_Rail": "Планка Пикатинни",
+  "Tooltip_MKI_Suppressor": "Глушитель 5.56 мм",
+  "Tooltip_NDR_Suppressor": "Глушитель 5.56 мм",
+  "Tooltip_PBS1_Suppressor": "Глушитель семейства АК",
+  "Tooltip_MP_Suppressor": "Глушитель 9x19 мм",
+  "Tooltip_Shh9_Suppressor": "Глушитель 9x19 мм",
+  "Tooltip_P45_Suppressor": "Глушитель .45 ACP",
+  "Tooltip_Trap": "Можно бросить или установить как ловушку"
 }

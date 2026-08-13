@@ -1,4 +1,4 @@
--- Realistic Combat - Fix 2 - Build 42.20.2
+-- Realistic Combat - Fix 3 - Build 42.20.2
 -- Off-hand attacks are real SwipeStatePlayer attacks.  The mod only chooses
 -- which equipped one-handed melee weapon the vanilla combat pipeline sees.
 
@@ -23,8 +23,6 @@ local function stateFor(player)
             launchPending = false,
             launchDelay = 0,
             ownsMeleeInput = false,
-            debugOffhandStarts = 0,
-            debugStrainTransfers = 0,
         }
         states[idx] = s
     end
@@ -62,6 +60,60 @@ local function isValidOneHandedMelee(weapon)
         and not weapon:isBroken()
         and not weapon:isRequiresEquippedBothHands()
         and not weapon:isTwoHandWeapon()
+end
+
+-- Strict balance rule:
+-- any melee weapon marked by the game's own scripts as two-handed must occupy
+-- both hands. This uses the vanilla item flags (TwoHandWeapon /
+-- RequiresEquippedBothHands), so the rule automatically follows the actual
+-- weapon scripts instead of maintaining a hard-coded weapon list.
+local function isTwoHandedMelee(weapon)
+    return weapon
+        and instanceof(weapon, "HandWeapon")
+        and weapon:isMelee()
+        and not weapon:isRanged()
+        and (weapon:isRequiresEquippedBothHands() or weapon:isTwoHandWeapon())
+end
+
+local function hasTwoHandedConflict(player)
+    if not player then return false end
+
+    local primary = player:getPrimaryHandItem()
+    local secondary = player:getSecondaryHandItem()
+
+    if isTwoHandedMelee(primary) and secondary ~= primary then
+        return true
+    end
+    if isTwoHandedMelee(secondary) and primary ~= secondary then
+        return true
+    end
+    return false
+end
+
+local function enforceTwoHandedMelee(player)
+    if not player then return false end
+
+    local primary = player:getPrimaryHandItem()
+    local secondary = player:getSecondaryHandItem()
+
+    if isTwoHandedMelee(primary) then
+        if secondary ~= primary then
+            player:setSecondaryHandItem(primary)
+            player:setUseHandWeapon(primary)
+            return true
+        end
+        return false
+    end
+
+    if isTwoHandedMelee(secondary) then
+        if primary ~= secondary then
+            player:setPrimaryHandItem(secondary)
+            player:setUseHandWeapon(secondary)
+            return true
+        end
+    end
+
+    return false
 end
 
 local function getDualWeapons(player)
@@ -233,10 +285,6 @@ local function startOffhandAttack(player)
         return false
     end
 
-    if s.debugOffhandStarts < 3 then
-        s.debugOffhandStarts = s.debugOffhandStarts + 1
-        print("[RealisticCombat] off-hand vanilla attack started: " .. tostring(secondary:getFullType()))
-    end
     return true
 end
 
@@ -329,10 +377,6 @@ local function transferVanillaStrainToLeft(player, s)
     moved = moved + transferOnePart(player, BodyPartType.ForeArm_R, BodyPartType.ForeArm_L, s.strainBefore.forearm)
     moved = moved + transferOnePart(player, BodyPartType.UpperArm_R, BodyPartType.UpperArm_L, s.strainBefore.upperarm)
 
-    if moved > 0 and s.debugStrainTransfers < 3 then
-        s.debugStrainTransfers = s.debugStrainTransfers + 1
-        print("[RealisticCombat] moved vanilla off-hand muscle strain to left arm: " .. tostring(moved))
-    end
 
     s.strainBefore = nil
     s.strainTransferPending = false
@@ -417,8 +461,21 @@ end
 
 local function onPlayerUpdate(player)
     if not player then return end
+
     local s = states[player:getIndex()]
-    if not s then return end
+
+    if hasTwoHandedConflict(player) then
+        if s then
+            resetState(player, s)
+        end
+        enforceTwoHandedMelee(player)
+        return
+    end
+
+    if not s then
+        enforceTwoHandedMelee(player)
+        return
+    end
     if player:isDead() then
         resetState(player, s)
         return
@@ -484,6 +541,7 @@ local function onCreatePlayer(playerIndex, player)
     states[playerIndex] = nil
     clearAnimFlags(player)
     player:setAuthorizeMeleeAction(true)
+    enforceTwoHandedMelee(player)
 end
 
 Events.OnCreatePlayer.Add(onCreatePlayer)
@@ -492,4 +550,4 @@ Events.OnWeaponSwingHitPoint.Add(onWeaponSwingHitPoint)
 Events.OnPlayerAttackFinished.Add(onPlayerAttackFinished)
 Events.OnPlayerUpdate.Add(onPlayerUpdate)
 
-print("[RealisticCombat] Fix 2 loaded - owned vanilla alternating attack chain")
+print("[RealisticCombat] Fix 3 loaded - strict two-handed rule + vanilla alternating attack chain")

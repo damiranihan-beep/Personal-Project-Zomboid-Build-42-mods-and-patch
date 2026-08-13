@@ -1,11 +1,19 @@
 {
   "Tooltip_HomemadePlasticSuppressor": "Noise: -45%% | Damage: -20%% | Firing range: -20%%",
-  "Tooltip_HomemadePlasticSuppressorCritical": "Noise: -15%% | Damage: -20%% | Firing range: -20%%",
+  "Tooltip_HomemadePlasticSuppressorCritical": "Noise: -25%% | Damage: -20%% | Firing range: -20%%",
   "Tooltip_HomemadePlasticSuppressorBroken": "Broken and detached. Current weapon modifiers: none.",
   "Tooltip_HomemadeCanSuppressor": "Noise: -55%% | Damage: -20%% | Firing range: -20%%",
-  "Tooltip_HomemadeCanSuppressorCritical": "Noise: -25%% | Damage: -20%% | Firing range: -20%%",
+  "Tooltip_HomemadeCanSuppressorCritical": "Noise: -35%% | Damage: -20%% | Firing range: -20%%",
   "Tooltip_HomemadeCanSuppressorBroken": "Broken. Noise: +10%% | Damage: -10%% | Firing range: -30%%",
   "Tooltip_HomemadePipeSuppressor": "Noise: -65%% | Damage: -20%% | Firing range: -20%%",
-  "Tooltip_HomemadePipeSuppressorCritical": "Noise: -35%% | Damage: -20%% | Firing range: -20%%",
-  "Tooltip_HomemadePipeSuppressorBroken": "Broken. Noise: +10%% | Damage: -10%% | Firing range: -30%%"
+  "Tooltip_HomemadePipeSuppressorCritical": "Noise: -45%% | Damage: -20%% | Firing range: -20%%",
+  "Tooltip_HomemadePipeSuppressorBroken": "Broken. Noise: +10%% | Damage: -10%% | Firing range: -30%%",
+  "Tooltip_Rail": "Picatinny rail",
+  "Tooltip_MKI_Suppressor": "5.56 mm suppressor",
+  "Tooltip_NDR_Suppressor": "5.56 mm suppressor",
+  "Tooltip_PBS1_Suppressor": "AK-family suppressor",
+  "Tooltip_MP_Suppressor": "9x19 mm suppressor",
+  "Tooltip_Shh9_Suppressor": "9x19 mm suppressor",
+  "Tooltip_P45_Suppressor": ".45 ACP suppressor",
+  "Tooltip_Trap": "Can be thrown or placed as a trap"
 }
