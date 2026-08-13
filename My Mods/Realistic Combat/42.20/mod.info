@@ -1,0 +1,9 @@
+name=Realistic Combat
+id=DualWieldingLite_B42
+version=1.0
+description=Realistic dual-wield melee combat for Build 42.20.2: hold attack to alternate main-hand and off-hand attacks through the vanilla combat pipeline. Vanilla shove and stomp are preserved.
+poster=poster.png
+icon=icon.png
+author=Personal Mod Collection
+modversion=1
+versionMin=42.20.2

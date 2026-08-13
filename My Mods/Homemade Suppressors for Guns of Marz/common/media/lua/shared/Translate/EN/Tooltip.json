@@ -1,0 +1,11 @@
+{
+  "Tooltip_HomemadePlasticSuppressor": "Light improvised suppressor made from plastic bottles.",
+  "Tooltip_HomemadePlasticSuppressorCritical": "Almost broken: the next shot is the last.",
+  "Tooltip_HomemadePlasticSuppressorBroken": "Broken; cannot be repaired or mounted again.",
+  "Tooltip_HomemadeCanSuppressor": "Improvised suppressor made from empty metal cans.",
+  "Tooltip_HomemadeCanSuppressorCritical": "Almost broken: the next shot is the last.",
+  "Tooltip_HomemadeCanSuppressorBroken": "Broken and unrepairable; if left attached it hinders the weapon.",
+  "Tooltip_HomemadePipeSuppressor": "Heavy improvised suppressor made from metal pipe.",
+  "Tooltip_HomemadePipeSuppressorCritical": "Almost broken: the next shot is the last.",
+  "Tooltip_HomemadePipeSuppressorBroken": "Broken and unrepairable; if left attached it hinders the weapon."
+}

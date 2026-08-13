@@ -1,0 +1,71 @@
+module HomemadeSuppressors
+{
+    craftRecipe MakeHomemadePlasticSuppressor
+    {
+        time = 120,
+        category = Weapon,
+        NeedToBeLearn = true,
+        SkillRequired = Maintenance:1,
+        Tags = InHandCraft,
+        OnCreate = GOMHomemade.OnCreatePlastic,
+        inputs
+        {
+            item 2 [Base.WaterBottle;Base.PopBottle;Base.PopBottleRare;Base.Sportsbottle;Base.JuiceCranberry;Base.JuiceFruitpunch;Base.JuiceGrape;Base.JuiceLemon;Base.JuiceOrange;Base.JuiceTomato;Base.Bleach;Base.CleaningLiquid2;Base.HairDyeCommon;Base.HairDyeUncommon;Base.HairDyeRare;Base.IndustrialDye] flags[IsEmpty;ItemCount;IsExclusive],
+            item 8 [Base.RippedSheets;Base.DenimStrips] flags[IsExclusive],
+            item 2 [Base.DuctTape;Base.Scotchtape] flags[IsExclusive],
+            item 1 tags[Hammer;ClubHammer] mode:keep,
+            item 1 tags[SharpKnife] mode:keep flags[SharpnessCheck;IsNotDull],
+        }
+        outputs
+        {
+            item 1 HomemadeSuppressors.HomemadePlasticSuppressor,
+        }
+    }
+
+    craftRecipe MakeHomemadeCanSuppressor
+    {
+        time = 240,
+        category = Weapon,
+        NeedToBeLearn = true,
+        SkillRequired = Maintenance:3,
+        Tags = InHandCraft,
+        OnCreate = GOMHomemade.OnCreateCan,
+        inputs
+        {
+            item 1 [2:Base.TinCanEmpty;3:Base.PopEmpty;3:Base.Pop2Empty;3:Base.Pop3Empty] flags[IsExclusive;ItemCount],
+            item 2 [Base.Wire],
+            item 4 [Base.LeatherStrips],
+            item 1 tags[Hammer;ClubHammer] mode:keep,
+            item 1 tags[MetalworkingPliers] mode:keep,
+            item 1 [Base.File] mode:keep,
+        }
+        outputs
+        {
+            item 1 HomemadeSuppressors.HomemadeCanSuppressor,
+        }
+    }
+
+    craftRecipe MakeHomemadePipeSuppressor
+    {
+        time = 480,
+        category = Weapon,
+        NeedToBeLearn = true,
+        SkillRequired = Maintenance:5;MetalWelding:3,
+        Tags = InHandCraft,
+        OnCreate = GOMHomemade.OnCreatePipe,
+        inputs
+        {
+            item 1 [Base.MetalPipe;Base.LeadPipe] flags[IsExclusive],
+            item 4 [Base.ScrapMetal],
+            item 2 [Base.BlowTorch],
+            item 1 tags[Hammer;ClubHammer] mode:keep,
+            item 1 tags[MetalworkingPliers] mode:keep,
+            item 1 [Base.File] mode:keep,
+            item 1 tags[WeldingMask] mode:keep,
+        }
+        outputs
+        {
+            item 1 HomemadeSuppressors.HomemadePipeSuppressor,
+        }
+    }
+}

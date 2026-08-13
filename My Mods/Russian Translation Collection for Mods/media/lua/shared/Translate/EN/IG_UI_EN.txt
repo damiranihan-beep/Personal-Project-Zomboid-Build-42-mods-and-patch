@@ -1,0 +1,6 @@
+IGUI_EN = {
+    IGUI_HotbarAttachment_Vest_Left = "Vest Left",
+    IGUI_HotbarAttachment_Vest_Right = "Vest Right",
+    IGUI_HotbarAttachment_HuntingVestLeft = "Vest Left",
+    IGUI_HotbarAttachment_HuntingVestRight = "Vest Right",
+}

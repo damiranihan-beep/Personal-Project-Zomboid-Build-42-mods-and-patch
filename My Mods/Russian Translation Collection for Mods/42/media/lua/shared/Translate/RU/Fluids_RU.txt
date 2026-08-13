@@ -1,0 +1,3 @@
+Fluids_RU = {
+    Fluid_Name_JuicedFruits = "Фруктовый сок",
+}

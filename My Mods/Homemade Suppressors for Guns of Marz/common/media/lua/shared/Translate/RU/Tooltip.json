@@ -1,0 +1,11 @@
+{
+  "Tooltip_HomemadePlasticSuppressor": "Лёгкий самодельный глушитель из пластиковых бутылок.",
+  "Tooltip_HomemadePlasticSuppressorCritical": "Почти сломан: следующий выстрел станет последним.",
+  "Tooltip_HomemadePlasticSuppressorBroken": "Сломан, не ремонтируется и не устанавливается повторно.",
+  "Tooltip_HomemadeCanSuppressor": "Самодельный глушитель из пустых металлических банок.",
+  "Tooltip_HomemadeCanSuppressorCritical": "Почти сломан: следующий выстрел станет последним.",
+  "Tooltip_HomemadeCanSuppressorBroken": "Сломан, не ремонтируется. Если остался на оружии, мешает стрельбе.",
+  "Tooltip_HomemadePipeSuppressor": "Тяжёлый самодельный глушитель из металлической трубы.",
+  "Tooltip_HomemadePipeSuppressorCritical": "Почти сломан: следующий выстрел станет последним.",
+  "Tooltip_HomemadePipeSuppressorBroken": "Сломан, не ремонтируется. Если остался на оружии, мешает стрельбе."
+}

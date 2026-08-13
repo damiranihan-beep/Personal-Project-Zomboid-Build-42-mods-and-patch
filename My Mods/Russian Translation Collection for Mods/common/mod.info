@@ -1,0 +1,8 @@
+name=Russian Translation Collection for Mods
+id=MyRussianTranslations
+description=Russian translations for selected Project Zomboid Build 42 mods. Enable after the original mods.
+poster=poster.png
+icon=icon.png
+author=Personal Translation Collection
+modversion=2
+versionMin=42.0

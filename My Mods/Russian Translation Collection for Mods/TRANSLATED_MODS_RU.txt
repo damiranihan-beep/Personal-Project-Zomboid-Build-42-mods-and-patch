@@ -1,0 +1,85 @@
+СБОРКА РУСИФИКАТОРА ДЛЯ МОДОВ — ТЕКУЩАЯ ВЕРСИЯ
+Project Zomboid Build 42.20.2
+ID: MyRussianTranslations
+
+ПЕРЕВЕДЁННЫЕ МОДЫ / МОДУЛИ:
+01. Dual Wielding Attacks
+02. Fancy Handwork B42.20
+03. 300 Points Trait
+04. [B42] Barricaded World - Extended Erosion (Continued)
+05. [B42] Mod Manager
+06. [B42] Pack Mule
+07. Armor Makes Sense
+08. Bone Scavenger
+09. Bring Out Your Dead
+10. CleanHotBar
+11. CleanUI
+12. Daily Report Journal [Reforged]
+13. Detailed Descriptions for Occupations and Traits
+14. Dry That Food In Multiplayer!
+15. Dry That Food!
+16. Equipment UI
+17. Equipment UI Patch
+18. Faster Cloth Ripping
+19. Fluffy Hair
+20. Foraging Tooltip Extended
+21. Guns of Marz
+22. Gunworks-gang
+23. HereGoesTheSun
+24. Hot Brass - Visible Casing Ejection Framework [B42.15]
+25. Improved Farming Info Window
+26. Long Term Preservation
+27. Long Term Preservation Extended
+28. Mini Health Panel
+29. Mod Load Order Sorter [b42]
+30. Mod Update and Alert System
+31. More Damaged Objects
+32. Neat Building
+33. Neat Building - Buildables SES Compatible
+34. Neat Building - Railings Pack
+35. Neat Building - UI Only
+36. Neat Building – XP & Mod Display
+37. Neat Crafting
+38. Neat Crafting – XP & Mod Display
+39. NeatUI XP Drop
+40. Open All Containers
+41. Picking Meister
+42. Project Cook
+43. Rain Cleans Blood
+44. Retro Car Dashboard Refreshed
+45. Show Weapon Stats Plus
+46. SMB Random Spawn
+47. Spongie's Clothing
+48. Spongie's Open Jackets [BASE]
+49. Spongie's Open Jackets [VANILLA CLOTHING]
+50. Standardized Vehicle Upgrades 3 - Core (3403490889)
+51. Standardized Vehicle Upgrades 3 - Core (3304580957)
+52. Standardized Vehicle Upgrades 3 - Vanilla
+53. Tactical hold Complete
+54. TchernoLib
+55. Throw your bag across
+56. Tidy Up Meister
+57. Tomb's Goth Hair
+58. Tomb's Goth Makeup
+59. Tomb's Player Body - [Customisation]
+60. Tsar's Common Library
+61. Tsar's Common Library v.2.07
+62. Vehicle Repair Overhaul [build 42]
+63. Vehicle Salvage Overhaul [build 42]
+64. Лестницы
+
+ИСПРАВЛЕНИЯ ИТОГОВОЙ ВЕРСИИ 2:
+- [B42] Pack Mule: переведены дополнительные слоты панели быстрого доступа: «Vest Left» → «Жилет слева» и «Vest Right» → «Жилет справа». Добавлены штатные IGUI-ключи для текущих Vest_Left/Vest_Right и старых HuntingVestLeft/HuntingVestRight.
+- Long Term Preservation Extended / UI Tweak: названия рецептов больше не передаются в игру как кириллица, жёстко записанная в Lua. Они вынесены в штатные ключи локализации getText(), чтобы убрать нечитаемые символы в списке рецептов.
+- Guns of Marz: все русские строки пользовательских подсказок оружия, насадок и боеприпасов вынесены из Lua в штатную RU-локализацию; исправлен также заголовок блока «Информация».
+- В runtime Lua-файлах перевода не осталось кириллических строковых литералов, которые могли повреждаться при чтении Lua-файлов игрой.
+- Литеральные знаки процента в новых локализационных строках экранированы как %% для Project Zomboid 42.20.2.
+- Сохранены остальные переводы и исправления из предыдущей сборки.
+- В архив не включены файлы проверки, VALIDATION, временные скрипты или служебные результаты.
+
+ТЕХНИЧЕСКИ:
+- Перенесено в getText(): 147 уникальных кириллических runtime-строк.
+- Long Term Preservation / общий runtime-патч: 22 строк.
+- Guns of Marz: 124 уникальных строк подсказок + 1 строка заголовка.
+
+Примечание: Spongie Clothing Fix B42.15+ по-прежнему не включён как отдельный переведённый модуль.

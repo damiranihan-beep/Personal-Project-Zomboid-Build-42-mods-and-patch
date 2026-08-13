@@ -1,0 +1,10 @@
+name=Homemade Suppressors for Guns of Marz
+id=GOM_HomemadeSuppressors
+description=Balanced craftable homemade suppressors for Guns of Marz. Project Zomboid Build 42.20.2.
+poster=poster.png
+icon=icon.png
+author=Personal Mod Collection
+modversion=1
+versionMin=42.20.2
+require=MarzGuns
+loadModAfter=HBVCEFb42,SWMG,MarzGuns

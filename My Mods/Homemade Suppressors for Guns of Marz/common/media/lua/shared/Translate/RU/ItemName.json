@@ -1,0 +1,11 @@
+{
+  "HomemadeSuppressors.HomemadePlasticSuppressor": "Самодельный глушитель из пластиковой бутылки",
+  "HomemadeSuppressors.HomemadePlasticSuppressor_Critical": "Самодельный глушитель из пластиковой бутылки",
+  "HomemadeSuppressors.HomemadePlasticSuppressor_Broken": "Сломанный глушитель из пластиковой бутылки",
+  "HomemadeSuppressors.HomemadeCanSuppressor": "Самодельный баночный глушитель",
+  "HomemadeSuppressors.HomemadeCanSuppressor_Critical": "Самодельный баночный глушитель",
+  "HomemadeSuppressors.HomemadeCanSuppressor_Broken": "Сломанный баночный глушитель",
+  "HomemadeSuppressors.HomemadePipeSuppressor": "Самодельный трубный глушитель",
+  "HomemadeSuppressors.HomemadePipeSuppressor_Critical": "Самодельный трубный глушитель",
+  "HomemadeSuppressors.HomemadePipeSuppressor_Broken": "Сломанный трубный глушитель"
+}
