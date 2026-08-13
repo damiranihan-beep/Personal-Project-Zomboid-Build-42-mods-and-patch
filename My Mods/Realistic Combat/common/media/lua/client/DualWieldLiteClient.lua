@@ -1,4 +1,4 @@
--- Dual Wielding Lite - Build 42.20.2
+-- Realistic Combat - Fix 2 - Build 42.20.2
 -- Off-hand attacks are real SwipeStatePlayer attacks.  The mod only chooses
 -- which equipped one-handed melee weapon the vanilla combat pipeline sees.
 
@@ -19,6 +19,12 @@ local function stateFor(player)
             strainBefore = nil,
             strainTransferPending = false,
             strainTransferDelay = 0,
+            nextPhase = nil,
+            launchPending = false,
+            launchDelay = 0,
+            ownsMeleeInput = false,
+            debugOffhandStarts = 0,
+            debugStrainTransfers = 0,
         }
         states[idx] = s
     end
@@ -28,6 +34,24 @@ end
 local function clearAnimFlags(player)
     player:setVariable("DWL_Offhand", false)
     player:setVariable("DWL_OffhandStab", false)
+end
+
+-- While the alternating chain is active, suppress only the input-driven melee
+-- DoAttack() path. Direct player:pressedAttack() calls still go through vanilla
+-- CombatManager, but the held LMB can no longer steal the first weapon-ready
+-- frame and start another right-hand swing before our off-hand attack.
+local function takeOverMeleeInput(player, s)
+    if not s.ownsMeleeInput then
+        player:setAuthorizeMeleeAction(false)
+        s.ownsMeleeInput = true
+    end
+end
+
+local function releaseMeleeInput(player, s)
+    if s.ownsMeleeInput then
+        player:setAuthorizeMeleeAction(true)
+        s.ownsMeleeInput = false
+    end
 end
 
 local function isValidOneHandedMelee(weapon)
@@ -149,6 +173,7 @@ end
 
 local function cancelOffhandLaunch(player, s)
     restoreHands(player, s)
+    releaseMeleeInput(player, s)
     player:setUseHandWeapon(s.primary)
     player:setInitiateAttack(false)
     player:setAttackStarted(false)
@@ -160,6 +185,9 @@ local function cancelOffhandLaunch(player, s)
     s.primary = nil
     s.secondary = nil
     s.offhandWeapon = nil
+    s.nextPhase = nil
+    s.launchPending = false
+    s.launchDelay = 0
 end
 
 local function startOffhandAttack(player)
@@ -205,6 +233,10 @@ local function startOffhandAttack(player)
         return false
     end
 
+    if s.debugOffhandStarts < 3 then
+        s.debugOffhandStarts = s.debugOffhandStarts + 1
+        print("[RealisticCombat] off-hand vanilla attack started: " .. tostring(secondary:getFullType()))
+    end
     return true
 end
 
@@ -271,29 +303,36 @@ end
 
 local function transferOnePart(player, rightType, leftType, before)
     local damage = player:getBodyDamage()
-    if not damage then return end
+    if not damage then return 0 end
 
     local right = damage:getBodyPart(rightType)
     local left = damage:getBodyPart(leftType)
-    if not right or not left then return end
+    if not right or not left then return 0 end
 
     local currentRight = right:getStiffness()
     local delta = currentRight - before
-    if delta <= 0 then return end
+    if delta <= 0 then return 0 end
 
-    -- Vanilla B42 assumes melee always originates from the primary/right arm.
-    -- Our collision is otherwise fully vanilla, so move only the stiffness it
-    -- just added to the actual off-hand/left arm. No custom strain amount exists.
+    -- Vanilla B42.20.2 adds melee strain to the right arm. For a confirmed
+    -- off-hand collision, move exactly the stiffness vanilla just added to the
+    -- corresponding left-arm body part; no custom strain amount is invented.
     right:setStiffness(math.max(0, currentRight - delta))
     left:setStiffness(math.min(100, left:getStiffness() + delta))
+    return delta
 end
 
 local function transferVanillaStrainToLeft(player, s)
     if not s.strainBefore then return end
 
-    transferOnePart(player, BodyPartType.Hand_R, BodyPartType.Hand_L, s.strainBefore.hand)
-    transferOnePart(player, BodyPartType.ForeArm_R, BodyPartType.ForeArm_L, s.strainBefore.forearm)
-    transferOnePart(player, BodyPartType.UpperArm_R, BodyPartType.UpperArm_L, s.strainBefore.upperarm)
+    local moved = 0
+    moved = moved + transferOnePart(player, BodyPartType.Hand_R, BodyPartType.Hand_L, s.strainBefore.hand)
+    moved = moved + transferOnePart(player, BodyPartType.ForeArm_R, BodyPartType.ForeArm_L, s.strainBefore.forearm)
+    moved = moved + transferOnePart(player, BodyPartType.UpperArm_R, BodyPartType.UpperArm_L, s.strainBefore.upperarm)
+
+    if moved > 0 and s.debugStrainTransfers < 3 then
+        s.debugStrainTransfers = s.debugStrainTransfers + 1
+        print("[RealisticCombat] moved vanilla off-hand muscle strain to left arm: " .. tostring(moved))
+    end
 
     s.strainBefore = nil
     s.strainTransferPending = false
@@ -319,6 +358,7 @@ local function resetState(player, s)
     if s.swapPending then
         restoreHands(player, s)
     end
+    releaseMeleeInput(player, s)
     clearAnimFlags(player)
     if player:getPrimaryHandItem() and instanceof(player:getPrimaryHandItem(), "HandWeapon") then
         player:setUseHandWeapon(player:getPrimaryHandItem())
@@ -331,14 +371,20 @@ local function resetState(player, s)
     s.offhandWeapon = nil
     s.lastWasShove = false
     s.lastWasGround = false
+    s.nextPhase = nil
+    s.launchPending = false
+    s.launchDelay = 0
 end
 
 local function onPlayerAttackFinished(player, weapon)
     if not instanceof(player, "IsoPlayer") then return end
     local s = stateFor(player)
 
-    -- If the attack button was released, or vanilla shove/stomp/grapple input is
-    -- taking over, stop the chain immediately. Normal next clicks remain vanilla.
+    -- SwipeStatePlayer fires this event before the character has fully returned
+    -- to weapon-ready. Fix 2 also takes ownership of input-driven melee here:
+    -- the physical held-attack input is temporarily unauthorized, while our
+    -- direct pressedAttack() calls remain vanilla CombatManager attacks. This
+    -- prevents the base game's right-hand auto-repeat from starving the off-hand.
     local canContinue = isAttackButtonHeld(player)
         and not s.lastWasShove
         and not s.lastWasGround
@@ -358,22 +404,25 @@ local function onPlayerAttackFinished(player, weapon)
         return
     end
 
-    -- AttackStarted is cleared by SwipeStatePlayer immediately before this event,
-    -- so starting the next swing here prevents the held-input path from also
-    -- creating a duplicate attack later in the same frame.
+    takeOverMeleeInput(player, s)
+
     if s.phase == "offhand" then
-        clearAnimFlags(player)
-        player:setUseHandWeapon(primary)
-        startMainAttack(player)
+        s.nextPhase = "main"
     else
-        startOffhandAttack(player)
+        s.nextPhase = "offhand"
     end
+    s.launchPending = true
+    s.launchDelay = 1
 end
 
 local function onPlayerUpdate(player)
-    if not player or player:isDead() then return end
+    if not player then return end
     local s = states[player:getIndex()]
     if not s then return end
+    if player:isDead() then
+        resetState(player, s)
+        return
+    end
 
     if s.strainTransferPending then
         if s.strainTransferDelay > 0 then
@@ -383,9 +432,50 @@ local function onPlayerUpdate(player)
         end
     end
 
-    -- Safety recovery if an attack is interrupted after the temporary swap but
-    -- before OnWeaponSwing can restore it (hit reaction, state cancellation, etc.).
-    if s.swapPending and not player:isAttackStarted() then
+    -- Safety recovery if an off-hand setup was interrupted after the temporary
+    -- hand swap but before OnWeaponSwing restored the visible hand layout.
+    if s.swapPending and not player:isAttackStarted() and not s.launchPending then
+        resetState(player, s)
+        return
+    end
+
+    if not s.launchPending then return end
+
+    if not isAttackButtonHeld(player) or wantsVanillaMeleeAction(player) then
+        resetState(player, s)
+        return
+    end
+
+    local primary, secondary = getDualWeapons(player)
+    if not primary then
+        resetState(player, s)
+        return
+    end
+
+    -- Let SwipeStatePlayer finish its state transition first. CombatManager's
+    -- pressedAttack() explicitly rejects a normal melee attack while WeaponReady
+    -- is false, which is the race that made the previous build stop after hand 1.
+    if player:isAttackStarted() or not player:isWeaponReady() then return end
+
+    if s.launchDelay > 0 then
+        s.launchDelay = s.launchDelay - 1
+        return
+    end
+
+    local nextPhase = s.nextPhase
+    s.launchPending = false
+    s.nextPhase = nil
+
+    local started = false
+    if nextPhase == "offhand" then
+        started = startOffhandAttack(player)
+    else
+        clearAnimFlags(player)
+        player:setUseHandWeapon(primary)
+        started = startMainAttack(player)
+    end
+
+    if not started then
         resetState(player, s)
     end
 end
@@ -393,6 +483,7 @@ end
 local function onCreatePlayer(playerIndex, player)
     states[playerIndex] = nil
     clearAnimFlags(player)
+    player:setAuthorizeMeleeAction(true)
 end
 
 Events.OnCreatePlayer.Add(onCreatePlayer)
@@ -400,3 +491,5 @@ Events.OnWeaponSwing.Add(onWeaponSwing)
 Events.OnWeaponSwingHitPoint.Add(onWeaponSwingHitPoint)
 Events.OnPlayerAttackFinished.Add(onPlayerAttackFinished)
 Events.OnPlayerUpdate.Add(onPlayerUpdate)
+
+print("[RealisticCombat] Fix 2 loaded - owned vanilla alternating attack chain")

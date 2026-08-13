@@ -4,7 +4,7 @@ module HomemadeSuppressors
     {
         time = 120,
         category = Weapon,
-        NeedToBeLearn = true,
+        NeedToBeLearn = false,
         SkillRequired = Maintenance:1,
         Tags = InHandCraft,
         OnCreate = GOMHomemade.OnCreatePlastic,
@@ -26,7 +26,7 @@ module HomemadeSuppressors
     {
         time = 240,
         category = Weapon,
-        NeedToBeLearn = true,
+        NeedToBeLearn = false,
         SkillRequired = Maintenance:3,
         Tags = InHandCraft,
         OnCreate = GOMHomemade.OnCreateCan,
@@ -49,7 +49,7 @@ module HomemadeSuppressors
     {
         time = 480,
         category = Weapon,
-        NeedToBeLearn = true,
+        NeedToBeLearn = false,
         SkillRequired = Maintenance:5;MetalWelding:3,
         Tags = InHandCraft,
         OnCreate = GOMHomemade.OnCreatePipe,

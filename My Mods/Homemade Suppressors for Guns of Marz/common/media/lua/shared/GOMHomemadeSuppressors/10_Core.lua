@@ -86,8 +86,19 @@ local function dropBrokenPlastic(player,weapon,part,cfg)
     if b then
         b:setConditionMax(maxc); b:setCondition(0); b:setBroken(true)
         local md=b:getModData(); md.GOMHSInitialized=true; md.GOMHSRolledCondition=maxc
-        local sq=player:getCurrentSquare()
-        if sq then sq:AddWorldInventoryItem(b,0.45,0.45,0.0) else player:getInventory():AddItem(b) end
+        -- Drop the detached plastic suppressor on the square in front of the
+        -- character. Fall back to the current square/inventory only if the
+        -- target square cannot be resolved.
+        local fx,fy=player:getForwardDirectionX(),player:getForwardDirectionY()
+        local dx=(fx>0.35 and 1) or (fx<-0.35 and -1) or 0
+        local dy=(fy>0.35 and 1) or (fy<-0.35 and -1) or 0
+        local cell=player:getCell()
+        local sq=nil
+        if cell then
+            sq=cell:getGridSquare(math.floor(player:getX())+dx,math.floor(player:getY())+dy,math.floor(player:getZ()))
+        end
+        if not sq then sq=player:getCurrentSquare() end
+        if sq then sq:AddWorldInventoryItem(b,0.50,0.50,0.0) else player:getInventory():AddItem(b) end
     end
     sync(player,weapon)
 end
@@ -95,6 +106,24 @@ local function getCanon(weapon)
     if not weapon or not weapon.getWeaponPart then return nil end
     return weapon:getWeaponPart("Canon")
 end
+
+-- MarzGuns Sound Overhaul can assign its shot sound after SWMG has rebuilt
+-- attachment stats. Re-assert the homemade suppressor sound at the weapon-swing
+-- boundary and while the attachment is active. This does not change gameplay
+-- SoundRadius/SoundVolume; those continue to come from SWMG.
+local function enforceWorkingSuppressorSound(weapon)
+    if not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
+    local part=getCanon(weapon); if not part then return end
+    local info=TYPE_STATE[part:getFullType()]
+    if info and info.state=="working" and weapon.setSwingSound then
+        weapon:setSwingSound("CapGunRifleShoot")
+    end
+end
+
+local function onWeaponSwingAudio(attacker,weapon)
+    enforceWorkingSuppressorSound(weapon)
+end
+Events.OnWeaponSwing.Add(onWeaponSwingAudio)
 local function processShot(player,weapon)
     if not player or not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
     local part=getCanon(weapon); if not part then return end
@@ -130,6 +159,8 @@ end
 local counter=0
 local function periodic(player)
     if not player then return end
+    local held=player:getPrimaryHandItem()
+    if held and instanceof(held,"HandWeapon") then enforceWorkingSuppressorSound(held) end
     counter=counter+1; if counter<60 then return end; counter=0
     autoLearn(player)
     local weapon=player:getPrimaryHandItem()

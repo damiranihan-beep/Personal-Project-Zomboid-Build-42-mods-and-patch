@@ -660,12 +660,48 @@ local function MRT_patchLTPRecipeNames()
     return false
 end
 
+
+-- Barricaded World and Project Seasons add several context-menu labels directly
+-- from Lua instead of localization files. Translate only these exact labels when
+-- ISContextMenu.addOption() receives them; no per-frame scanning is needed.
+local MRT_WORLD_CONTEXT_KEYS = {
+    ["BarricadedWorld"] = "UI_MRT_Runtime_023",
+    ["Barricaded World"] = "UI_MRT_Runtime_023",
+    ["Enable protection for Door"] = "UI_MRT_Runtime_024",
+    ["Enable protection for Window"] = "UI_MRT_Runtime_028",
+    ["Protect building"] = "UI_MRT_Runtime_025",
+    ["Unprotect building"] = "UI_MRT_Runtime_026",
+    ["CleanErosion"] = "UI_MRT_Runtime_027",
+    ["cleanerosion"] = "UI_MRT_Runtime_027",
+}
+
+local MRT_worldContextHooked = false
+local function MRT_installWorldContextPatch()
+    if MRT_worldContextHooked then return true end
+    if type(ISContextMenu) ~= "table" or type(ISContextMenu.addOption) ~= "function" then
+        return false
+    end
+
+    local oldAddOption = ISContextMenu.addOption
+    ISContextMenu.addOption = function(self, name, ...)
+        if type(name) == "string" then
+            local key = MRT_WORLD_CONTEXT_KEYS[name]
+            if key then name = MRT_T(key) end
+        end
+        return oldAddOption(self, name, ...)
+    end
+
+    MRT_worldContextHooked = true
+    return true
+end
+
 local function MRT_patchLiveInstances()
     pcall(MRT_patchLTPRecipeNames)
     pcall(MRT_installDRJPatch)
     pcall(MRT_installDRJRenderPatch)
     pcall(MRT_installMHPPatch)
     pcall(MRT_installLightUIHooks)
+    pcall(MRT_installWorldContextPatch)
 
     pcall(MRT_patchHiddenEnglishUI)
     pcall(MRT_patchSandboxScreens)

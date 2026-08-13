@@ -7,42 +7,50 @@ if not okCSA or not okSF then
     return
 end
 
-CSA.RegisterRestoreStats({"SwingSound","SoundRadius","SoundVolume","MaxDamage","MinDamage"})
+CSA.RegisterRestoreStats({"SwingSound","SoundRadius","SoundVolume","MaxDamage","MinDamage","MaxRange"})
 CSA.RegisterMultipleParts({
     ["HomemadeSuppressors.HomemadePlasticSuppressor"] = {
-        SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
+        SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
         SF.Set("SwingSound","CapGunRifleShoot"),
     },
     ["HomemadeSuppressors.HomemadeCanSuppressor"] = {
-        SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
+        SF.Multiply("SoundRadius",0.45), SF.Multiply("SoundVolume",0.45),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
         SF.Set("SwingSound","CapGunRifleShoot"),
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor"] = {
-        SF.Multiply("SoundRadius",0.45), SF.Multiply("SoundVolume",0.45),
+        SF.Multiply("SoundRadius",0.35), SF.Multiply("SoundVolume",0.35),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
         SF.Set("SwingSound","CapGunRifleShoot"),
     },
     ["HomemadeSuppressors.HomemadePlasticSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.85), SF.Multiply("SoundVolume",0.85),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
     },
     ["HomemadeSuppressors.HomemadeCanSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.75), SF.Multiply("SoundVolume",0.75),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
         SF.Multiply("MaxDamage",0.80), SF.Multiply("MinDamage",0.80),
+        SF.Multiply("MaxRange",0.80),
     },
     ["HomemadeSuppressors.HomemadeCanSuppressor_Broken"] = {
         SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
+        SF.Multiply("MaxRange",0.70),
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor_Broken"] = {
         SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
+        SF.Multiply("MaxRange",0.70),
     },
 })
 

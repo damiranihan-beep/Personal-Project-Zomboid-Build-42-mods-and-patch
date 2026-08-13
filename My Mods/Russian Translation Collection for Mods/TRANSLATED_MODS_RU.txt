@@ -67,6 +67,7 @@ ID: MyRussianTranslations
 62. Vehicle Repair Overhaul [build 42]
 63. Vehicle Salvage Overhaul [build 42]
 64. Лестницы
+65. [B42/B41] Project Seasons (runtime: CleanErosion)
 
 ИСПРАВЛЕНИЯ ИТОГОВОЙ ВЕРСИИ 2:
 - [B42] Pack Mule: переведены дополнительные слоты панели быстрого доступа: «Vest Left» → «Жилет слева» и «Vest Right» → «Жилет справа». Добавлены штатные IGUI-ключи для текущих Vest_Left/Vest_Right и старых HuntingVestLeft/HuntingVestRight.
