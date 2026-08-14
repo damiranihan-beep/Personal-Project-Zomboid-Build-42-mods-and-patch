@@ -1,0 +1,23 @@
+FINAL STATIC VALIDATION — B42.20.2
+
+Status: PASS
+Files checked: 111
+JSON parse errors/issues: 0
+
+Checks:
+- UTF-8 all text: OK
+- JSON parse: OK
+- WATC setMountOn mutation absent: OK
+- WATC duplicate ZZZ absent: OK
+- AttackVars.clear absent: OK
+- banned Aluminum/AluminumFragments pipe ingredients absent: OK
+- corrupt sleeve text absent: OK
+- runtime formatter keys Zoom/Rally normalized: OK
+- automatic-fire sound helper non-recursive: OK
+- suppressor sound boundaries present: OK
+- HS load order after MarzGunsSoundOverhaul: OK
+- balance documentation Fix 3.10 synchronized: OK
+- translation has no duplicated Marz tooltip Lua: OK
+- all UI_HS optic keys exist in RU/EN: OK
+- Build 42.20.2 metadata: OK
+- optic tiers 1/3/6/10 present: OK

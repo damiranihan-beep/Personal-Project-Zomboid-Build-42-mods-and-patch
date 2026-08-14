@@ -1,11 +1,11 @@
 name=Homemade Suppressors for Guns of Marz
 id=GOM_HomemadeSuppressors
-version=3.10
-description=Final audited Build 42.20.2 homemade suppressor patch. Fix 3.10: -45/-55/-65 noise tiers, agreed damage/range/crit penalties, guaranteed plastic break recovery, exact tooltip compatibility data and automatic-fire sound fail-safe.
+version=3.12
+description=Build 42.20.2. Only the three homemade suppressors: crafting, skill requirements, weapon compatibility, suppressor balance, audio, wear and break behavior. No optic rebalance and no foreign attachment tooltip replacement.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
-modversion=3.10
+modversion=3.12
 versionMin=42.20.2
 require=MarzGuns
-loadModAfter=HBVCEFb42,SWMG,MarzGuns,MarzGunsSoundOverhaul,WeaponAttachmentTooltipCleaner
+loadModAfter=HBVCEFb42,SWMG,MarzGuns,MarzGunsSoundOverhaul

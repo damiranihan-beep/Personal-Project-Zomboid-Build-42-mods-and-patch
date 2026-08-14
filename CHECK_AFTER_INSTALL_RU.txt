@@ -1,11 +1,13 @@
-PROJECT ZOMBOID BUILD 42.20.2 — FINAL LIVE CHECK
+PROJECT ZOMBOID BUILD 42.20.2 — ПРОВЕРКА ПОСЛЕ УСТАНОВКИ SPLIT BUILD
 
-1. Automatic fire: full burst with plastic/can/pipe suppressors. No normal unsuppressed shot.
-2. Last critical shot stays suppressed.
-3. Break plastic: broken item is on current square; if placement fails it is in inventory.
-4. Hover GoM magazine: ammo count/type/weight remain visible; no horizontal "Можно закрепить на"; exact weapon list is vertical.
-5. Hover rail/scope/suppressor: no raw UI_HS_* keys and no ERROR growth.
-6. PL-4 / PS-1 / PM-2 / PRL-1: +1 / +3 / +6 / +10 to hit, crit and sight range.
-7. Realistic Combat: injured left arm slows off-hand; off-hand never finisher.
-8. Smoking: "Курить с пачки сигарет" works from backpack; lighter merge works; pack return remains separate mod.
-9. Fresh console: search ERROR, WATC, GOM HS, UnknownFormatConversionException.
+1. В менеджере модов включить:
+   - Homemade Suppressors for Guns of Marz 3.12
+   - Guns of Marz Attachment Rebalance 1.0
+   - Weapon Attachment Tooltip Cleaner 1.5
+2. PL-4: поколение/1% отображаются текстом, никаких UI_HS_/UI_GOMAR_ ключей.
+3. Reflex S2: «Можно закрепить на» не уходит вправо; модели перечислены вниз.
+4. Магазины: вес/тип/патроны не пропадают; совместимость вертикально.
+5. Picatinny: конкретные модели вертикально.
+6. Самодельные глушители: установка, очередь, износ и поломка работают как до разделения.
+7. Наводить курсор на обвесы 20–30 секунд; ERROR не растёт.
+8. Свежий console: поискать WATC, GOM Attachment Rebalance, GOM HS, ERROR, NullPointerException.

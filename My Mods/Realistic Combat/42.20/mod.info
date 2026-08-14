@@ -1,10 +1,10 @@
 name=Realistic Combat
 id=DualWieldingLite_B42
-version=1.34
-description=Realistic dual-wield melee combat for Build 42.20.2. Off-hand attacks use the vanilla combat pipeline and left-arm injury speed, but the second hand can never trigger a close-kill/finisher.
+version=1.35
+description=Realistic dual-wield melee combat for Build 42.20.2. Fix 3.5 removes unsafe Java AttackVars/CloseKillMove field writes that spammed ERRORs during the second-hand attack; left-arm injury speed and vanilla off-hand attack pipeline remain.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
-modversion=3.4
+modversion=3.5
 versionMin=42.20.2
 loadModAfter=FancyHandworkB42_19,FH

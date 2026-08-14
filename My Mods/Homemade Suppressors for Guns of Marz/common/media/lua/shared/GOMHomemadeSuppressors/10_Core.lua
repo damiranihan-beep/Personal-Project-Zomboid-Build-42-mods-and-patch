@@ -1,4 +1,4 @@
--- GOM Homemade Suppressors Fix 3.10 - B42.20.2
+-- GOM Homemade Suppressors Fix 3.11 - B42.20.2
 GOMHomemade = GOMHomemade or {}
 local okAnim, Animations = pcall(require, "WeaponSystems/Utils/Animations")
 local RNG = newrandom()
@@ -221,4 +221,4 @@ local function periodic(player)
     end
 end
 Events.OnPlayerUpdate.Add(periodic)
-print("[GOM HS] Fix 3.10 core loaded - automatic-fire suppressor fail-safe active")
+print("[GOM HS] Fix 3.11 core loaded - automatic-fire suppressor fail-safe active")

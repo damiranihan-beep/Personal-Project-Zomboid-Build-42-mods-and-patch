@@ -1,3 +1,19 @@
+FIX 3.12 — разделение модулей
+- Homemade Suppressors теперь строго только про три самодельных глушителя.
+- Удалён ребаланс пистолетных прицелов.
+- Удалены все overrides/provider-ы tooltip Guns of Marz.
+- Удалены UI_HS_Optic_* и UI_HS_Compat_* из глушительного мода.
+- Weapon Attachment Tooltip Cleaner больше не является частью/зависимостью глушительного мода.
+- Баланс, звук, износ, рецепты и поломка Fix 3.11 сохранены.
+
+HOMEMADE SUPPRESSORS — FIX 3.11
+Дата: 14.08.2026
+
+- Баланс, звук, поломка и рецепты Fix 3.10 не менялись.
+- Tooltip-provider больше не отдаёт видимый список совместимого оружия.
+- Точные compatRaw данные остаются только как скрытая служебная метаинформация для WATC v1.3, чтобы тот мог удалить штатный блок «Можно закрепить на» целиком.
+- Это защищает от повторного появления категорий/моделей даже при цепочке нескольких tooltip-wrapper'ов.
+
 HOMEMADE SUPPRESSORS — FIX 3.10
 - Automatic-fire sound fail-safe on swing/hit/update/tick.
 - Restored exact GoM tooltip compatibility provider.

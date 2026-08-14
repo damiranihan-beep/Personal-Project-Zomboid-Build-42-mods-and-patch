@@ -1,23 +1,20 @@
-FINAL STATIC VALIDATION — B42.20.2
+FINAL STATIC VALIDATION — B42.20.2 — SPLIT BUILD
 
-Status: PASS
-Files checked: 111
-JSON parse errors/issues: 0
+Status: PASS (static)
 
 Checks:
-- UTF-8 all text: OK
-- JSON parse: OK
-- WATC setMountOn mutation absent: OK
-- WATC duplicate ZZZ absent: OK
-- AttackVars.clear absent: OK
-- banned Aluminum/AluminumFragments pipe ingredients absent: OK
-- corrupt sleeve text absent: OK
-- runtime formatter keys Zoom/Rally normalized: OK
-- automatic-fire sound helper non-recursive: OK
-- suppressor sound boundaries present: OK
-- HS load order after MarzGunsSoundOverhaul: OK
-- balance documentation Fix 3.10 synchronized: OK
-- translation has no duplicated Marz tooltip Lua: OK
-- all UI_HS optic keys exist in RU/EN: OK
-- Build 42.20.2 metadata: OK
+- Homemade Suppressors 3.12 contains only suppressor gameplay + its own translations/assets: OK
+- HS MarzWeapons tooltip override/provider absent: OK
+- HS optic rebalance absent: OK
+- active UI_HS_* keys absent: OK
+- Attachment Rebalance 1.0 isolated: OK
 - optic tiers 1/3/6/10 present: OK
+- optic tooltip patch touches only 4 GoM table entries: OK
+- WATC 1.5 setMountOn mutation absent: OK
+- WATC provider dependency absent: OK
+- WATC vertical compatibility renderer present: OK
+- WATC read-only compatibility map present: OK
+- translation percent signs escaped: OK
+- JSON parse/UTF-8 check: OK
+
+Runtime UI/event behavior still needs live test in Project Zomboid.

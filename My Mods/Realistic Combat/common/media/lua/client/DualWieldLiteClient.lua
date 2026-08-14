@@ -1,4 +1,4 @@
--- Realistic Combat - Fix 3.4 - Build 42.20.2
+-- Realistic Combat - Fix 3.5 - Build 42.20.2
 -- Off-hand attacks are real SwipeStatePlayer attacks.  The mod only chooses
 -- which equipped one-handed melee weapon the vanilla combat pipeline sees.
 
@@ -20,9 +20,6 @@ local function stateFor(player)
             strainTransferPending = false,
             strainTransferDelay = 0,
             armSlotsSaved = nil,
-            closeKillWeapon = nil,
-            closeKillMoveSaved = nil,
-            closeKillMoveSuppressed = false,
             nextPhase = nil,
             launchPending = false,
             launchDelay = 0,
@@ -208,45 +205,16 @@ local function restorePendingArmSlotSwap(player, s)
     s.armSlotsSaved = nil
 end
 
-local function forceAttackVarsNoCloseKill(player)
-    -- AttackVars.bCloseKill is a public Build 42 field. Access is protected
-    -- because AttackVars is Java userdata; never probe Java methods with `.clear`.
-    pcall(function()
-        local vars = player:getAttackVars()
-        if vars then vars.bCloseKill = false end
-    end)
-end
-
+-- Build 42.20.2 exposes AttackVars/CloseKillMove to Lua as Java userdata in this
+-- runtime. Direct field reads/writes (even inside pcall) generate engine ERRORs.
+-- Fix 3.5 deliberately does not touch those userdata fields. Stability of the
+-- real off-hand SwipeStatePlayer attack takes priority over forced finisher suppression.
 local function suppressOffhandCloseKill(player, s, weapon)
-    if not s or not weapon then return end
-
-    -- Belt-and-suspenders rule: remove the weapon's CloseKillMove for the whole
-    -- off-hand swing, then also force AttackVars.bCloseKill false. The right-hand
-    -- weapon is untouched and can still use vanilla finishers.
-    s.closeKillWeapon = weapon
-    s.closeKillMoveSaved = nil
-    s.closeKillMoveSuppressed = false
-
-    local okRead, saved = pcall(function() return weapon.CloseKillMove end)
-    if okRead then
-        s.closeKillMoveSaved = saved
-        local okWrite = pcall(function() weapon.CloseKillMove = nil end)
-        s.closeKillMoveSuppressed = okWrite
-    end
-
-    forceAttackVarsNoCloseKill(player)
+    -- Intentionally empty: no Java userdata field mutation.
 end
 
 local function restoreOffhandCloseKill(s)
-    if not s then return end
-    if s.closeKillMoveSuppressed and s.closeKillWeapon then
-        pcall(function()
-            s.closeKillWeapon.CloseKillMove = s.closeKillMoveSaved
-        end)
-    end
-    s.closeKillWeapon = nil
-    s.closeKillMoveSaved = nil
-    s.closeKillMoveSuppressed = false
+    -- Intentionally empty: nothing was mutated.
 end
 
 local function pressedAttackUsingLeftArm(player, s)
@@ -256,11 +224,9 @@ local function pressedAttackUsingLeftArm(player, s)
     restorePendingArmSlotSwap(player, s)
     s.armSlotsSaved = swapArmBodyPartSlots(player)
 
-    forceAttackVarsNoCloseKill(player)
     local ok, err = pcall(function()
         player:pressedAttack()
     end)
-    forceAttackVarsNoCloseKill(player)
 
     if not ok then
         restorePendingArmSlotSwap(player, s)
@@ -327,9 +293,8 @@ local function startOffhandAttack(player)
     player:setPrimaryHandItem(secondary)
     player:setSecondaryHandItem(primary)
 
-    -- Off-hand rule: NEVER allow a close-kill/finisher. Suppress the weapon's
-    -- CloseKillMove before vanilla evaluates this swing and keep it suppressed
-    -- until OnPlayerAttackFinished/reset.
+    -- Fix 3.5: do not mutate CloseKillMove/AttackVars here. Those are Java userdata
+    -- in B42.20.2 and were the direct source of the repeated second-hand ERRORs.
     suppressOffhandCloseKill(player, s, secondary)
 
     -- Let vanilla calculate the off-hand attack with the left arm's actual
@@ -390,7 +355,6 @@ local function onWeaponSwing(attacker, weapon)
     -- player's actual hand layout before the attack animation is rendered, then
     -- keep useHandWeapon pinned to the off-hand weapon for sound/collision/hit.
     if s.phase == "offhand" and s.swapPending and weapon == s.offhandWeapon then
-        forceAttackVarsNoCloseKill(attacker)
         -- At this point SwipeStatePlayer has already selected/calculated the
         -- off-hand attack. Restore the real body-part layout before normal UI
         -- and damage updates continue.
@@ -463,7 +427,6 @@ local function onWeaponSwingHitPoint(attacker, weapon)
     s.lastWasGround = attacker:isAimAtFloor() or attacker:isShoveStompAnim() or attacker:isDoStomp()
 
     if s.phase == "offhand" and weapon == s.offhandWeapon then
-        forceAttackVarsNoCloseKill(attacker)
         -- CombatManager applies its normal endurance + combat muscle strain just
         -- after this Lua event returns. Snapshot now, transfer that exact resulting
         -- stiffness to the left arm on the following player update.
@@ -500,8 +463,7 @@ local function onPlayerAttackFinished(player, weapon)
     if not instanceof(player, "IsoPlayer") then return end
     local s = stateFor(player)
 
-    -- The off-hand swing is over. Restore the weapon's original CloseKillMove
-    -- before any possible right-hand swing starts.
+    -- Fix 3.5 compatibility hook; currently no Java userdata is mutated.
     restoreOffhandCloseKill(s)
 
     -- SwipeStatePlayer fires this event before the character has fully returned
@@ -630,4 +592,4 @@ Events.OnWeaponSwingHitPoint.Add(onWeaponSwingHitPoint)
 Events.OnPlayerAttackFinished.Add(onPlayerAttackFinished)
 Events.OnPlayerUpdate.Add(onPlayerUpdate)
 
-print("[RealisticCombat] Fix 3.4 loaded - left-arm injury speed + offhand finishers disabled")
+print("[RealisticCombat] Fix 3.5 loaded - Java AttackVars/CloseKillMove writes removed")
