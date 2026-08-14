@@ -1,20 +1,19 @@
-# Weapon Attachment Tooltip Cleaner v2.1 TEST
+# Weapon Attachment Tooltip Cleaner
 
-UI-only патч для **Guns of Marz** на Project Zomboid 42.20.2.
+UI-only compatibility/tooltip patch for Project Zomboid Build 42.20.2 + Guns of Marz.
 
-## Что изменено
+Current version: **2.7.2**.
 
-- Родной tooltip игры сохраняется: вес, текущие патроны, вместимость, боеприпас, состояние и прочие штатные строки не пересобираются вручную.
-- Магазины GoM больше не должны показывать общие `Пистолеты и револьверы` / `Винтовки и дробовики`: на время отрисовки FakeItem-категория заменяется точными моделями из реестра GoM/Gunworks, затем исходный MountOn немедленно восстанавливается.
-- Названия совместимого оружия сокращаются до моделей без `штурмовая винтовка`, `гражданская винтовка` и прочих суффиксов.
-- Красный заголовок `Information` заменён на `Информация`.
-- Английские stat-строки Guns of Marz берутся из уже существующих русских `UI_MRT_MarzTooltip_*` переводов.
-- Четыре прицела PL-4 / PS-1 / PM-2 / PRL-1 остаются во владении отдельного **Guns of Marz Attachment Rebalance** и не перезаписываются Cleaner'ом.
+What v2.7.2 does:
+- The custom compatibility list is blue, matched to the in-game `Mod: ...` source line; the native caption stays untouched.
+- adds localized fallbacks for custom GoM WeaponPart type labels so raw keys such as `Tooltip_Weapon_LaserRifle` are not shown;
+- keeps exactly one compatibility caption (`Можно прикрепить на`);
+- suppresses only the native `MountOn` value during tooltip rendering;
+- draws a deterministic short-model compatibility list below the caption with ` / ` separators;
+- wraps long lists for smaller inventory windows;
+- never builds the list from localized long weapon names, so no `M16A1 — штурмовая винтовка` spam and no Cyrillic concatenation mojibake;
+- resolves Guns of Marz and GOM Attachment Rebalance tooltip localization keys at render time;
+- preserves Show Weapon Stats Plus weapon stats;
+- never permanently changes `MountOn`, attachment compatibility, item stats or gameplay data.
 
-## Чего мод НЕ делает
-
-- не меняет постоянный MountOn;
-- не меняет реальную совместимость магазина/насадки;
-- не меняет характеристики;
-- не меняет ёмкость или боеприпасы;
-- не содержит глушители или их баланс.
+The mod is intentionally UI-only.

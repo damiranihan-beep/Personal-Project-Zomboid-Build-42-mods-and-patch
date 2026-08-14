@@ -1,3 +1,7 @@
 UI_EN = {
     UI_WATC_InfoHeader = "Information",
+    UI_WATC_CanAttach = "Can attach to:",
+    UI_WATC_Group_Pistols = "Pistols / revolvers",
+    UI_WATC_Group_Rifles = "Rifles / shotguns",
+    UI_WATC_Group_Rails = "Picatinny rails / AK mounts / integrated rails",
 }

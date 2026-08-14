@@ -1,0 +1,16 @@
+Tooltip_EN = {
+    -- Native WeaponPart caption retained as our single compatibility header.
+    Tooltip_weapon_CanBeMountOn = "Can attach to",
+    Tooltip_weapon_LaserRifle = "Laser sight",
+    Tooltip_Weapon_LaserRifle = "Laser sight",
+    Tooltip_weapon_LightRifle = "Tactical light",
+    Tooltip_Weapon_LightRifle = "Tactical light",
+    Tooltip_weapon_BoosterScope = "Optical module",
+    Tooltip_Weapon_BoosterScope = "Optical module",
+    Tooltip_weapon_Shellholder = "Shell holder",
+    Tooltip_Weapon_Shellholder = "Shell holder",
+    Tooltip_weapon_BayonetKnife = "Bayonet",
+    Tooltip_Weapon_BayonetKnife = "Bayonet",
+    Tooltip_weapon_BayonetIntegrated = "Bayonet (integrated)",
+    Tooltip_Weapon_BayonetIntegrated = "Bayonet (integrated)",
+}

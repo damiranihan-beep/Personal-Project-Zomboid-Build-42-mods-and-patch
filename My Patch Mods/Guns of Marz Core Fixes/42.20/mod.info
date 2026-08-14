@@ -1,0 +1,11 @@
+name=Guns of Marz Core Fixes
+id=GOM_CoreFixes
+version=1.0
+modversion=1
+versionMin=42.20.2
+description=Small Build 42.20.2 compatibility/bug-fix layer for Guns of Marz. Fixes the FN FNC integrated folding stock being removable as a normal weapon upgrade and repairs already-affected FNC weapons in the player inventory on load.
+poster=poster.png
+icon=icon.png
+author=Personal Mod Collection
+require=SWMG,MarzGuns
+loadModAfter=SWMG,MarzGuns

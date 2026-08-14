@@ -121,5 +121,13 @@ local data = {
     ["MarzGuns.W1887"] = { "UI_MRT_MarzTooltip_024", "UI_MRT_MarzTooltip_006" },
     ["MarzGuns.W1894"] = { "UI_MRT_MarzTooltip_022", "UI_MRT_MarzTooltip_006" },
     ["MarzGuns.XM177"] = { "UI_MRT_MarzTooltip_001", "UI_MRT_MarzTooltip_005" },
+    ["MarzGuns.AK_Mount"] = { "UI_MRT_MarzTooltip_116" },
+    ["MarzGuns.Sniper_Mount"] = { "UI_MRT_MarzTooltip_117" },
+    ["MarzGuns.Beretta_Mount"] = { "UI_MRT_MarzTooltip_118" },
+    ["MarzGuns.Colt_Mount"] = { "UI_MRT_MarzTooltip_119" },
+    ["MarzGuns.Heavy_Pistol_Rail"] = { "UI_MRT_MarzTooltip_120" },
+    ["MarzGuns.K98_BAYONET"] = { "UI_MRT_MarzTooltip_094" },
+    ["MarzGuns.M5_BAYONET"] = { "UI_MRT_MarzTooltip_094" },
+    ["MarzGuns.M9_BAYONET"] = { "UI_MRT_MarzTooltip_094" },
 }
 return data

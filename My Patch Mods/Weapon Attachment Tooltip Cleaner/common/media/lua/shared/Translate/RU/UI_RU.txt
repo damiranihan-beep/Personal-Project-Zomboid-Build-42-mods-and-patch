@@ -1,3 +1,7 @@
 UI_RU = {
     UI_WATC_InfoHeader = "Информация",
+    UI_WATC_CanAttach = "Можно прикрепить на:",
+    UI_WATC_Group_Pistols = "Пистолеты / револьверы",
+    UI_WATC_Group_Rifles = "Винтовки / дробовики",
+    UI_WATC_Group_Rails = "Планки Пикатинни / крепления АК / встроенные планки",
 }

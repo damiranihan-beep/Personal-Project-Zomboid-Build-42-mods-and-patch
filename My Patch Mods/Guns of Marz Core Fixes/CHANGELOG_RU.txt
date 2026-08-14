@@ -1,0 +1,6 @@
+Guns of Marz Core Fixes — v1.0 — 14.08.2026
+
+- Добавлены отсутствующие у автора MarzGuns.FNC_Integrated_Stock_Folded / Deployed в Gunworks PreventRemovals.
+- Добавлен безопасный repair уже сломанного FN FNC в инвентаре/руках при загрузке сохранения.
+- Реальная система складывания/раскладывания остаётся штатной Gunworks FoldingStock.
+- Никаких изменений характеристик оружия/насадок.
