@@ -1,9 +1,9 @@
 name=Guns of Marz Attachment Rebalance
 id=GOM_AttachmentRebalance
-version=1.0.1
-modversion=2
+version=2.0.0
+modversion=4
 versionMin=42.20.2
-description=Separate Guns of Marz attachment balance patch. Currently rebalances the PL-4, PS-1, PM-2 and PRL-1 handgun optics and supplies only their matching tooltip descriptions. Does not alter suppressors or attachment compatibility UI.
+description=Full stock-based Guns of Marz attachment rebalance: approved I-VII/U hierarchy, stat tiers, generation-prefixed names, installed-weapon rarity and standalone loot rarity. Does not alter suppressors, attachment compatibility, WATC UI, integrated weapon parts, or non-tiered attachments.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection

@@ -1,5 +1,5 @@
 -- GOM Homemade Suppressors - standalone SWMG registrations.
--- Fix 3.14: hard audio guard for burst/auto fire + broken-metal whistle penalty.
+-- Fix 3.16: use MarzGuns Sound Overhaul sound map when available; keep stats registration isolated.
 local okCSA, CSA = pcall(require, "WeaponSystems/Utils/CustomStatsAttachments")
 local okSF, SF = pcall(require, "WeaponSystems/Utils/StatsFactory")
 
@@ -209,4 +209,4 @@ if okB and Bayonet and Bayonet.SetExclusives then
     )
 end
 
-print("[GOM HS] Fix 3.14 stats/exclusives registered")
+print("[GOM HS] Fix 3.16 stats/exclusives registered")

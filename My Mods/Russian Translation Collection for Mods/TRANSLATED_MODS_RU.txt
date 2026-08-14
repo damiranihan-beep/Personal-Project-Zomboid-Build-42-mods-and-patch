@@ -1,3 +1,16 @@
+[CURRENT 4.4.3 — 15.08.2026]
+- Синхронизированы I–VII/U названия для Guns of Marz Attachment Rebalance 2.0.0.
+- Сохранены Tooltip_Weapon_LaserRifle/LightRifle/BoosterScope/Shellholder/Bayonet* fallback.
+- Сохранён IGUI_BackButton_Zoom = «Приближение %1%%».
+
+[HOTFIX 4.4.2 — 14.08.2026]
+- IGUI_BackButton_Zoom -> точная ванильная B42.20.2 строка «Приближение %1%%».
+- Guns of Marz: добавлены подписи кастомных PartType LaserRifle / LightRifle / BoosterScope / Shellholder / BayonetKnife / BayonetIntegrated (обе формы Tooltip_weapon_* и Tooltip_Weapon_*).
+
+[WATC/GOM 14.08.2026]
+- Tooltip_weapon_CanBeMountOn -> «Можно прикрепить на»
+- UI_GOMAR_Optic_G1..G4 + Stats + Range -> русский fallback
+
 СБОРКА РУСИФИКАТОРА ДЛЯ МОДОВ — ТЕКУЩАЯ ВЕРСИЯ
 Project Zomboid Build 42.20.2
 ID: MyRussianTranslations

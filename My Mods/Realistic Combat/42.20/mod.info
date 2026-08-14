@@ -1,10 +1,10 @@
 name=Realistic Combat
-id=DualWieldingLite_B42
-version=1.35
-description=Realistic dual-wield melee combat for Build 42.20.2. Fix 3.5 removes unsafe Java AttackVars/CloseKillMove field writes that spammed ERRORs during the second-hand attack; left-arm injury speed and vanilla off-hand attack pipeline remain.
+id=RealisticCombat
+version=3.8
+modversion=8
+versionMin=42.20.2
+description=Build 42.20.2 realistic dual-wield melee patch. Alternates main/off-hand attacks for two valid one-handed melee weapons, preserves vanilla combat effects, strict two-handed rules and Fancy Handwork compatibility. Fix 3.8 adds interruption recovery so a bite/hit cannot leave melee input disabled after an interrupted chain.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
-modversion=3.5
-versionMin=42.20.2
-loadModAfter=FancyHandworkB42_19,FH
+loadModAfter=FancyHandworkB42_19,FRCB42,EQUIPMENT_UI_B42

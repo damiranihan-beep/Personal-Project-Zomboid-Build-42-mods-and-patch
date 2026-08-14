@@ -147,8 +147,20 @@ local function dropBrokenPlastic(player,weapon,part,cfg)
 end
 
 local function getCanon(weapon)
-    if not weapon or not weapon.getWeaponPart then return nil end
-    return weapon:getWeaponPart("Canon")
+    if not weapon then return nil end
+
+    -- MarzGuns Sound Overhaul uses getCanon(); prefer the same API so both mods
+    -- resolve the exact same muzzle attachment. Keep getWeaponPart("Canon") as
+    -- a Build-42/Gunworks-compatible fallback.
+    if weapon.getCanon then
+        local ok, part = pcall(weapon.getCanon, weapon)
+        if ok and part then return part end
+    end
+    if weapon.getWeaponPart then
+        local ok, part = pcall(weapon.getWeaponPart, weapon, "Canon")
+        if ok then return part end
+    end
+    return nil
 end
 
 -- Keep the audible report suppressed for BOTH working and critical/last-shot
@@ -186,16 +198,15 @@ local function enforcePlayerWeaponSound(player)
     local held=player:getPrimaryHandItem()
     if held and instanceof(held,"HandWeapon") then enforceAttachmentSound(held) end
 end
-local function onTickSuppressorSound()
-    local p=getPlayer and getPlayer() or nil
-    enforcePlayerWeaponSound(p)
+local function onEquipPrimarySound(player)
+    enforcePlayerWeaponSound(player)
 end
-Events.OnTick.Add(onTickSuppressorSound)
+Events.OnEquipPrimary.Add(onEquipPrimarySound)
 
 -- MarzGuns Sound Overhaul itself rewrites SwingSound from OnPlayerUpdate.
--- Register after it and immediately reassert our state on the SAME event, so
--- its 15-update refresh cannot leave one frame with the normal report.
-Events.OnPlayerUpdate.Add(enforcePlayerWeaponSound)
+-- This mod loads after it. The single periodic OnPlayerUpdate handler below
+-- reasserts sound every update and performs slower maintenance work every 60
+-- updates, avoiding several competing per-frame handlers.
 
 -- Gunworks RealBurst schedules follow-up rounds through RateOfFire.startBurst
 -- and calls a captured attackHook directly from OnTick. Those follow-up rounds
@@ -217,7 +228,7 @@ local function installBurstSoundGuard()
         enforceAttachmentSound(weapon)
         return originalStartBurst(player,weapon,intervalMs,guardedHook,chargeDelta)
     end
-    print("[GOM HS] Fix 3.14 Gunworks burst sound guard installed")
+    print("[GOM HS] Fix 3.16 Gunworks burst sound guard installed")
 end
 installBurstSoundGuard()
 
@@ -240,7 +251,7 @@ local function installAttackSoundGuard()
     if okAdd then
         GOMHomemade._attackSoundGuardInstalled=true
         GOMHomemade._attackSoundGuard=guarded
-        print("[GOM HS] Fix 3.14 global attack sound guard installed")
+        print("[GOM HS] Fix 3.16 global attack sound guard installed")
     elseif okRemove then
         -- Defensive fallback: never leave the attack hook removed if adding our
         -- wrapper unexpectedly fails on another Gunworks build.
@@ -307,8 +318,7 @@ end
 local counter=0
 local function periodic(player)
     if not player then return end
-    local held=player:getPrimaryHandItem()
-    if held and instanceof(held,"HandWeapon") then enforceAttachmentSound(held) end
+    enforcePlayerWeaponSound(player)
     counter=counter+1; if counter<60 then return end; counter=0
     autoLearn(player)
     local weapon=player:getPrimaryHandItem()
@@ -321,4 +331,4 @@ local function periodic(player)
     end
 end
 Events.OnPlayerUpdate.Add(periodic)
-print("[GOM HS] Fix 3.14 core loaded - burst/auto audio guard + broken-metal whistle active")
+print("[GOM HS] Fix 3.16 core loaded - unified Marz audio resolver + burst/auto guard active")

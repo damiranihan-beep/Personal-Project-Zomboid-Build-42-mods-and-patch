@@ -1,3 +1,24 @@
+Russian Translation Collection 4.4.3
+- Синхронизированы отображаемые названия tiered-обвесов Guns of Marz Attachment Rebalance 2.0.0: префиксы I–VII/U.
+- Игровые характеристики и редкость по-прежнему принадлежат отдельному GOM_AttachmentRebalance; переводчик их не меняет.
+- Сохранены фиксы Tooltip_Weapon_LaserRifle и IGUI_BackButton_Zoom = "Приближение %1%%".
+
+v4.4.2 — 2026-08-14
+- Возвращена точная ванильная B42.20.2 строка `IGUI_BackButton_Zoom = "Приближение %1%%"`; исправляет отображение вида `250$s$%`.
+- Добавлены RU-подписи пользовательских Guns of Marz WeaponPart PartType (LaserRifle/LightRifle/BoosterScope/Shellholder/BayonetKnife/BayonetIntegrated) с обеими формами регистра ключа.
+- Игровая механика не менялась.
+
+2026-08-14 — WATC/GOM tooltip follow-up
+- Добавлен display override `Tooltip_weapon_CanBeMountOn = Можно прикрепить на`.
+- Продублированы 12 переводов UI_GOMAR_Optic_* как safety fallback для Attachment Rebalance 1.0.2.
+- Игровые характеристики и совместимость не меняются.
+
+v4.4.1 — совместимость с текущим выпуском
+- Homemade Suppressors 3.16 не добавляет новых локализационных ключей: перевод 3.15 остаётся актуальным.
+- WATC 2.3 / Realistic Combat 3.7 не требуют новых строк перевода.
+- Удалена устаревшая ссылка load-order на отсутствующий `ItemOverrideTooltipCleaner`.
+- Перевод теперь явно грузится после актуальной UI-цепочки: WATC, Attachment Rebalance, CleanUI, Armor Makes Sense, Equipment UI, Show Weapon Stats Plus, Open All Containers, Reorder Containers и Picking Meister.
+
 v4.4.1
 - Синхронизированы tooltip Homemade Suppressors 3.15: перевод больше не перекрывает числовые статы описательным текстом.
 - Сломанный пластиковый глушитель: «Непригоден.».

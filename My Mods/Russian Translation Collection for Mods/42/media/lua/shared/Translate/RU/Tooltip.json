@@ -98,5 +98,18 @@
   "Tooltip_item_JarToPreserveLonger": "Для более долгого хранения можно законсервировать в банке.",
   "Tooltip_item_MashedGarlicMash": "Используется для приготовления измельчённого чеснока.",
   "Tooltip_item_RefrigerateOnceOpened": "После открытия храните в холодильнике или морозильнике.",
-  "Tooltip_item_UseToLabelJars": "Используется для подписывания подходящих банок."
+  "Tooltip_item_UseToLabelJars": "Используется для подписывания подходящих банок.",
+  "Tooltip_weapon_CanBeMountOn": "Можно прикрепить на",
+  "Tooltip_weapon_LaserRifle": "Лазерный целеуказатель",
+  "Tooltip_Weapon_LaserRifle": "Лазерный целеуказатель",
+  "Tooltip_weapon_LightRifle": "Тактический фонарь",
+  "Tooltip_Weapon_LightRifle": "Тактический фонарь",
+  "Tooltip_weapon_BoosterScope": "Оптический модуль",
+  "Tooltip_Weapon_BoosterScope": "Оптический модуль",
+  "Tooltip_weapon_Shellholder": "Патронташ",
+  "Tooltip_Weapon_Shellholder": "Патронташ",
+  "Tooltip_weapon_BayonetKnife": "Штык",
+  "Tooltip_Weapon_BayonetKnife": "Штык",
+  "Tooltip_weapon_BayonetIntegrated": "Штык (встроенный)",
+  "Tooltip_Weapon_BayonetIntegrated": "Штык (встроенный)"
 }
