@@ -1,4 +1,4 @@
--- Guns of Marz Core Fixes v1.0
+-- Guns of Marz Core Fixes v1.1
 -- Build 42.20.2
 --
 -- Guns of Marz registers almost every integrated folding stock as permanent via
@@ -16,6 +16,8 @@ end
 PreventRemoval.Register({
     "MarzGuns.FNC_Integrated_Stock_Folded",
     "MarzGuns.FNC_Integrated_Stock_Deployed",
+    "MarzGuns.M24_Integrated_Bipod_Folded",
+    "MarzGuns.M24_Integrated_Bipod_Deployed",
 })
 
-print("[GoM Core Fixes] v1.0 registered FN FNC integrated stock as permanent")
+print("[GoM Core Fixes] v1.1 registered FN FNC stock and M24 bipod as permanent")

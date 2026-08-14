@@ -1,0 +1,35 @@
+Inspect Weapon - Guns of Marz Compatibility
+
+0.4.0 — Fix 3
+- Fix 2 runtime-check confirmed: magazine count is correct, scopes/rails/bayonets are visible, and the compat layer produced no Inspect Weapon stack exception during the control session.
+- Fixed the one-way attachment flow: empty GoM slots now list compatible parts actually present in player inventory.
+- Direct GoM installation no longer uses RiskyInspectWeapon's legacy fourth `50` argument. Current Gunworks treats argument #4 as UniversalAttachment outcomeFullType, so direct installs now use the safe three-argument call.
+- Added Gunworks UniversalAttachment-aware rail reinstall: generic rail item -> registered weapon-specific outcome.
+- Added dependency-safe removal through RequiredAttachment and UniversalAttachment checks. Parent rails cannot be removed while dependent attachments remain.
+- Detachable GoM WeaponParts now respect their screwdriver rule. Missing tool is shown as an explicit unavailable reason rather than a silent failure.
+- M5/K98/M9 detachable bayonets are no longer misclassified as permanent. Attach/remove uses Gunworks ISBayonetAttach / ISBayonetRemove so knife conversion and condition are preserved.
+- Added fallback UI labels to prevent raw `RailUp`, `BayonetKnife` and `UI_GOMIW_*` keys in the inspection window.
+- Empty custom rows remain after removal only when a compatible replacement source exists in inventory, allowing reinstall from the same Inspect Weapon window.
+- Preserved Fix 2 magazine tooltip synchronization, runtime part recovery, hidden internal animation parts, and native RiskyInspectWeapon renderer.
+- No weapon/attachment stat, MountOn, ammo, condition or repair-counter changes.
+
+0.3.0 — Fix 2
+- Сохранён штатный рендер Inspect Weapon; тяжёлая перерисовка Stage 1 не возвращалась.
+- Исправлен tooltip установленного магазина: временный объект магазина синхронизируется с реальным `CurrentAmmoCount` оружия.
+- Добавлен безопасный fallback установленных деталей через `getAllWeaponParts()` для штатных слотов Inspect Weapon.
+- Установленный GoM-прицел теперь может быть восстановлен в слоте «Прицел», даже если прямой `getWeaponPart("Scope")` вернул nil.
+- Установленные нестандартные детали GoM (`RailUp`, Underbarrel и т.п.) показываются отдельными строками.
+- Внутренние анимационные части (`Slide`, `Pump`, `Bolt`, `Lever`, `Barrel`, `Animated1..9`) скрыты.
+- Установленный магазин (`Clip`) не дублируется в дополнительных строках.
+- Сохранена защита несъёмных деталей через Gunworks PreventRemovals.
+- Убран глобальный поиск candidate-слотов по `getAllItems()`.
+- Добавлена компактная диагностическая строка при изменении набора установленных деталей.
+
+0.2.0 — Fix 1
+- Полностью отключён аварийный renderer override Stage 1.
+- Возвращён штатный рендер RiskyInspectWeapon.
+- Устранён спам `Object tried to call nil in getCandidateCategories`.
+
+0.1.0 — Stage 1 (отозван)
+- Первая попытка динамических GoM-слотов.
+- Отозвана после runtime-падения candidate-category API на Build 42.20.2.

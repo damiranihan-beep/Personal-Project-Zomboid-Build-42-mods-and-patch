@@ -1,0 +1,11 @@
+name=Inspect Weapon - Guns of Marz Compatibility
+id=GOM_InspectWeaponCompat
+version=0.4.0
+modversion=4
+versionMin=42.20.2
+description=Fix 3 compatibility layer for Inspect Weapon, Gunworks and Guns of Marz. Keeps the stable native Inspect Weapon renderer and live magazine fix, restores runtime GoM parts, makes scopes/rails/bayonets removable and reinstallable through framework-safe actions, respects screwdriver/dependency/permanent rules, and fixes raw custom slot labels. Does not alter weapon or attachment stats.
+poster=poster.png
+icon=icon.png
+author=Personal Mod Collection
+require=RiskyInspectWeapon,SWMG,MarzGuns
+loadModAfter=RiskyInspectWeapon,SWMG,MarzGuns,GOM_CoreFixes,GOM_AttachmentRebalance,GOM_HomemadeSuppressors

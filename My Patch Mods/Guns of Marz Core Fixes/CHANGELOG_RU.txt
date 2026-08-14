@@ -1,6 +1,14 @@
+Guns of Marz Core Fixes — v1.1 — 15.08.2026
+
+- При аудите интеграции Inspect Weapon найден второй пропуск stock Guns of Marz: оба state-предмета встроенных сошек M24 отсутствовали в `PreventRemovals`.
+- Добавлены `MarzGuns.M24_Integrated_Bipod_Folded` и `MarzGuns.M24_Integrated_Bipod_Deployed`.
+- Добавлено безопасное восстановление уже снятых встроенных сошек M24 через штатный `FoldingBipod.RestoreDeployedBipodState()`.
+- Сохранён фикс FN FNC из v1.0.
+- Никаких изменений характеристик оружия/насадок.
+
 Guns of Marz Core Fixes — v1.0 — 14.08.2026
 
-- Добавлены отсутствующие у автора MarzGuns.FNC_Integrated_Stock_Folded / Deployed в Gunworks PreventRemovals.
+- Добавлены отсутствующие у автора `MarzGuns.FNC_Integrated_Stock_Folded` / `Deployed` в Gunworks `PreventRemovals`.
 - Добавлен безопасный repair уже сломанного FN FNC в инвентаре/руках при загрузке сохранения.
-- Реальная система складывания/раскладывания остаётся штатной Gunworks FoldingStock.
+- Реальная система складывания/раскладывания остаётся штатной Gunworks `FoldingStock`.
 - Никаких изменений характеристик оружия/насадок.
