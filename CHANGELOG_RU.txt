@@ -9,6 +9,44 @@ PROJECT ZOMBOID BUILD 42.20.2 — ОБЩИЙ ЖУРНАЛ ИЗМЕНЕНИЙ
 15.08.2026
 ======================================================================
 
+Inspect Weapon - Guns of Marz Compatibility — 0.4.0 TEST / Fix 3
+- Контрольный Fix 2 подтвердил live-магазин и runtime-детали: в логе M1911/Mossberg Scope/RailUp корректно появляются и исчезают при снятии, а собственных stack exception у compat-слоя в этой сессии не зафиксировано.
+- Найдена причина односторонней установки: RiskyInspectWeapon передавал legacy `50` четвёртым аргументом `ISUpgradeWeapon:new`, тогда как Gunworks использует аргумент #4 как `UniversalAttachment outcomeFullType`.
+- Прямая установка GoM WeaponPart переведена на безопасный 3-аргументный вызов; UniversalAttachment использует зарегистрированный outcome.
+- Пустые GoM-слоты показывают только реальные совместимые кандидаты из инвентаря игрока; глобальный script-item scan не используется.
+- Съёмные планки получили обратимый remove/reinstall; родитель нельзя снять, пока остаётся зависимый прицел/обвес.
+- Съёмные M5/K98/M9 bayonet-attachment больше не считаются «вечными»: используется штатный Gunworks `ISBayonetAttach`/`ISBayonetRemove`.
+- Отвёртка и другие framework-условия не обходятся: недоступный кандидат остаётся видимым с причиной.
+- Добавлены fallback-подписи для кастомных PartType/status, чтобы не показывать raw `RailUp`, `BayonetKnife`, `UI_GOMIW_*`.
+- Fix 2 magazine sync и runtime-part fallback сохранены; gameplay stats/MountOn/ammo/condition не менялись.
+
+Inspect Weapon - Guns of Marz Compatibility — 0.3.0 TEST / Fix 2
+- Fix 1 подтвердил стабильность: старый `getCandidateCategories()`/renderer override больше не вызывается, прежний spam `Object tried to call nil` исчез.
+- Исправлен источник расхождения магазина: Inspect Weapon рисовал число из реального оружия, но tooltip строил на новом пустом proxy-магазине. Proxy теперь получает реальный `CurrentAmmoCount`.
+- Добавлен безопасный fallback уже установленных деталей через runtime `getAllWeaponParts()`; глобальный обход script items не возвращался.
+- Обычные слоты Inspect Weapon (включая Scope) получают runtime-деталь, если прямой lookup вернул nil.
+- Установленные нестандартные GoM PartType показываются ниже штатной сетки только для осмотра; внутренние animation PartType и Clip скрыты.
+- Permanent-part защита Gunworks сохранена. Condition/repair, оружейные характеристики, MountOn и механика боеприпасов не изменялись.
+- Добавлена компактная диагностическая строка набора runtime-частей для следующего теста M92FS.
+
+Inspect Weapon - Guns of Marz Compatibility — 0.2.0 TEST / Fix 1
+- Аварийный Stage 1 renderer override отключён целиком; возвращён штатный renderer RiskyInspectWeapon.
+- Устранена лавина `Object tried to call nil in getCandidateCategories` при открытом окне осмотра.
+
+Inspect Weapon - Guns of Marz Compatibility — 0.1.0 TEST (Stage 1, отозван)
+- Создан отдельный патч поверх Workshop Inspect Weapon; исходные файлы автора не копируются.
+- Добавлены пользовательские слоты Guns of Marz и скрыты служебные анимационные PartType.
+- Несъёмные детали защищены от generic detach через Gunworks PreventRemovals и integrated-registry fallback.
+- Для fold/deploy state показывается текущее состояние; смена state обновляет окно по лёгкой сигнатуре установленных частей.
+- Добавлена защита от накопления ширины Inspect Weapon и очистка stale joypad/UI-ссылок при rebuild.
+- На этом этапе характеристики оружия и обвесов не меняются.
+
+Guns of Marz Core Fixes — 1.1
+- Найден stock-пропуск: M24_Integrated_Bipod_Folded / Deployed не были зарегистрированы автором как permanent.
+- Обе детали добавлены в PreventRemovals.
+- Добавлено восстановление уже снятых встроенных сошек M24 через штатный FoldingBipod.
+- После фикса статический аудит integrated/state attachment-item: 39 найдено, 0 без permanent-защиты.
+
 Guns of Marz Attachment Rebalance — 2.0.0
 - Утверждён и реализован stock-based ребаланс обвесов Guns of Marz.
 - Поколения I–VII/U синхронизированы с последней пользовательской таблицей.
