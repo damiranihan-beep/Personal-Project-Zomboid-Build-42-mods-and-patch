@@ -1,7 +1,63 @@
 -- GOM Homemade Suppressors - standalone SWMG registrations.
--- Fix 3.11: final agreed suppressor balance for Build 42.20.2.
+-- Fix 3.14: hard audio guard for burst/auto fire + broken-metal whistle penalty.
 local okCSA, CSA = pcall(require, "WeaponSystems/Utils/CustomStatsAttachments")
 local okSF, SF = pcall(require, "WeaponSystems/Utils/StatsFactory")
+
+GOMHomemade = GOMHomemade or {}
+
+-- Use MarzGuns Sound Overhaul's own *_silence report when it is present.
+-- This avoids a tug-of-war where our old CapGun fallback and the sound overhaul
+-- could replace SwingSound between rounds of one automatic burst.
+function GOMHomemade.ResolveBaseSwingSound(weapon)
+    if weapon and weapon.getType and marzSoundList then
+        local base = marzSoundList[weapon:getType()]
+        if type(base) == "string" and base ~= "" then
+            return string.gsub(base, "_silence$", "")
+        end
+    end
+    if weapon and weapon.getSwingSound then
+        local current = weapon:getSwingSound()
+        if type(current) == "string" and current ~= "" then
+            return string.gsub(current, "_silence$", "")
+        end
+    end
+    return nil
+end
+
+function GOMHomemade.ResolveSuppressedSwingSound(weapon)
+    if weapon and weapon.getType and marzSoundList then
+        local base = marzSoundList[weapon:getType()]
+        if type(base) == "string" and base ~= "" then
+            if string.find(base, "_silence", 1, true) then return base end
+            return base .. "_silence"
+        end
+    end
+    if weapon and weapon.getSwingSound then
+        local current = weapon:getSwingSound()
+        if type(current) == "string" and string.find(current, "_silence", 1, true) then
+            return current
+        end
+    end
+    return "CapGunRifleShoot"
+end
+
+function GOMHomemade.ApplySuppressedSwingSound(weapon)
+    if not weapon or not weapon.setSwingSound then return end
+    weapon:setSwingSound(GOMHomemade.ResolveSuppressedSwingSound(weapon))
+end
+
+function GOMHomemade.ApplyBrokenSwingSound(weapon)
+    if not weapon or not weapon.setSwingSound then return end
+    local base = GOMHomemade.ResolveBaseSwingSound(weapon)
+    if base then weapon:setSwingSound(base) end
+end
+
+local function ApplySuppressedSwingSoundModifier(weapon, baseStats)
+    GOMHomemade.ApplySuppressedSwingSound(weapon)
+end
+local function ApplyBrokenSwingSoundModifier(weapon, baseStats)
+    GOMHomemade.ApplyBrokenSwingSound(weapon)
+end
 if not okCSA or not okSF then
     print("[GOM HS] WARNING: SWMG custom-stat API not available")
     return
@@ -14,21 +70,21 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["HomemadeSuppressors.HomemadeCanSuppressor"] = {
         SF.Multiply("SoundRadius",0.45), SF.Multiply("SoundVolume",0.45),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor"] = {
         SF.Multiply("SoundRadius",0.35), SF.Multiply("SoundVolume",0.35),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
 
     -- Last shot: suppression is 20 percentage points worse, but the shot
@@ -38,21 +94,21 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["HomemadeSuppressors.HomemadeCanSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
 
     -- Broken metal suppressors remain attached.
@@ -62,6 +118,7 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxRange",0.80),
         SF.Multiply("CriticalChance",0.90),
         SF.Multiply("CritDmgMultiplier",0.80),
+        ApplyBrokenSwingSoundModifier,
     },
     ["HomemadeSuppressors.HomemadePipeSuppressor_Broken"] = {
         SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
@@ -69,6 +126,7 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxRange",0.80),
         SF.Multiply("CriticalChance",0.90),
         SF.Multiply("CritDmgMultiplier",0.80),
+        ApplyBrokenSwingSoundModifier,
     },
 
     ["MarzGuns.HomemadePlasticSuppressor"] = {
@@ -76,21 +134,21 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["MarzGuns.HomemadeCanSuppressor"] = {
         SF.Multiply("SoundRadius",0.45), SF.Multiply("SoundVolume",0.45),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["MarzGuns.HomemadePipeSuppressor"] = {
         SF.Multiply("SoundRadius",0.35), SF.Multiply("SoundVolume",0.35),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
 
     -- Last shot: suppression is 20 percentage points worse, but the shot
@@ -100,21 +158,21 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["MarzGuns.HomemadeCanSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.65), SF.Multiply("SoundVolume",0.65),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
     ["MarzGuns.HomemadePipeSuppressor_Critical"] = {
         SF.Multiply("SoundRadius",0.55), SF.Multiply("SoundVolume",0.55),
         SF.Multiply("MaxDamage",0.90), SF.Multiply("MinDamage",0.90),
         SF.Multiply("MaxRange",0.90),
         SF.Multiply("CriticalChance",0.90),
-        SF.Set("SwingSound","CapGunRifleShoot"),
+        ApplySuppressedSwingSoundModifier,
     },
 
     -- Broken metal suppressors remain attached.
@@ -124,6 +182,7 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxRange",0.80),
         SF.Multiply("CriticalChance",0.90),
         SF.Multiply("CritDmgMultiplier",0.80),
+        ApplyBrokenSwingSoundModifier,
     },
     ["MarzGuns.HomemadePipeSuppressor_Broken"] = {
         SF.Multiply("SoundRadius",1.10), SF.Multiply("SoundVolume",1.10),
@@ -131,6 +190,7 @@ CSA.RegisterMultipleParts({
         SF.Multiply("MaxRange",0.80),
         SF.Multiply("CriticalChance",0.90),
         SF.Multiply("CritDmgMultiplier",0.80),
+        ApplyBrokenSwingSoundModifier,
     },
 
 })
@@ -149,4 +209,4 @@ if okB and Bayonet and Bayonet.SetExclusives then
     )
 end
 
-print("[GOM HS] Fix 3.11 stats/exclusives registered")
+print("[GOM HS] Fix 3.14 stats/exclusives registered")

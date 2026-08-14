@@ -1,11 +1,11 @@
 name=Homemade Suppressors for Guns of Marz
 id=GOM_HomemadeSuppressors
-version=3.12
+version=3.15
 description=Build 42.20.2. Only the three homemade suppressors: crafting, skill requirements, weapon compatibility, suppressor balance, audio, wear and break behavior. No optic rebalance and no foreign attachment tooltip replacement.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
-modversion=3.12
+modversion=3.15
 versionMin=42.20.2
 require=MarzGuns
 loadModAfter=HBVCEFb42,SWMG,MarzGuns,MarzGunsSoundOverhaul

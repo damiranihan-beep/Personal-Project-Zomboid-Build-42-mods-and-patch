@@ -1,6 +1,9 @@
--- GOM Homemade Suppressors Fix 3.11 - B42.20.2
+-- GOM Homemade Suppressors Fix 3.14 - B42.20.2
 GOMHomemade = GOMHomemade or {}
 local okAnim, Animations = pcall(require, "WeaponSystems/Utils/Animations")
+local okSF, StatsFactory = pcall(require, "WeaponSystems/Utils/StatsFactory")
+local okROF, RateOfFire = pcall(require, "WeaponSystems/Utils/RateOfFire")
+pcall(require, "TimedActions/ISReloadWeaponAction")
 local RNG = newrandom()
 
 local CFG = {
@@ -30,6 +33,13 @@ for kind,c in pairs(LEGACY) do
 end
 
 local function sync(player,weapon)
+    -- Direct detach/attach calls do not reliably re-run Gunworks custom-stat
+    -- layers. Reapply them after every suppressor state swap so the critical
+    -- shot really uses its louder 20-percentage-point-worse suppression and
+    -- a detached/broken suppressor cannot leave stale stats on the gun.
+    if weapon and okSF and StatsFactory and StatsFactory.ReapplyAllModifiers then
+        pcall(StatsFactory.ReapplyAllModifiers, weapon)
+    end
     if okAnim and Animations and Animations.CallSyncHandWeaponFields then
         pcall(Animations.CallSyncHandWeaponFields,player,weapon)
     end
@@ -144,40 +154,130 @@ end
 -- Keep the audible report suppressed for BOTH working and critical/last-shot
 -- states. Fix 3.8 only enforced the sound for "working", so the final shot could
 -- suddenly use the gun's normal report even though gameplay suppression remained.
-local function enforceSuppressorSound(weapon)
+local function enforceAttachmentSound(weapon)
     if not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
     local part=getCanon(weapon); if not part then return end
     local info=TYPE_STATE[part:getFullType()]
-    if info and (info.state=="working" or info.state=="critical") and weapon.setSwingSound then
-        weapon:setSwingSound("CapGunRifleShoot")
+    if not info or not weapon.setSwingSound then return end
+
+    if info.state=="working" or info.state=="critical" then
+        if GOMHomemade.ApplySuppressedSwingSound then
+            GOMHomemade.ApplySuppressedSwingSound(weapon)
+        else
+            weapon:setSwingSound("CapGunRifleShoot")
+        end
+    elseif info.state=="broken" and (info.kind=="can" or info.kind=="pipe") then
+        -- MarzGuns Sound Overhaul treats any Canon item whose type contains
+        -- "Suppressor" as live, including our broken metal shells. Force the
+        -- native weapon report back while the broken can/pipe remains mounted.
+        if GOMHomemade.ApplyBrokenSwingSound then
+            GOMHomemade.ApplyBrokenSwingSound(weapon)
+        end
     end
 end
 
 local function onWeaponSwingAudio(attacker,weapon)
-    enforceSuppressorSound(weapon)
+    enforceAttachmentSound(weapon)
 end
 Events.OnWeaponSwing.Add(onWeaponSwingAudio)
 
--- Automatic-fire fail-safe: other gun/audio scripts may restore the gun's native
--- SwingSound between rounds of one held burst. Reassert the active suppressor
--- sound at the global tick boundary as well as OnPlayerUpdate/OnWeaponSwing.
 local function enforcePlayerWeaponSound(player)
     if not player then return end
     local held=player:getPrimaryHandItem()
-    if held and instanceof(held,"HandWeapon") then enforceSuppressorSound(held) end
+    if held and instanceof(held,"HandWeapon") then enforceAttachmentSound(held) end
 end
 local function onTickSuppressorSound()
     local p=getPlayer and getPlayer() or nil
     enforcePlayerWeaponSound(p)
 end
 Events.OnTick.Add(onTickSuppressorSound)
+
+-- MarzGuns Sound Overhaul itself rewrites SwingSound from OnPlayerUpdate.
+-- Register after it and immediately reassert our state on the SAME event, so
+-- its 15-update refresh cannot leave one frame with the normal report.
+Events.OnPlayerUpdate.Add(enforcePlayerWeaponSound)
+
+-- Gunworks RealBurst schedules follow-up rounds through RateOfFire.startBurst
+-- and calls a captured attackHook directly from OnTick. Those follow-up rounds
+-- can bypass normal hook timing. Guard the captured hook so every scheduled
+-- burst round gets the correct sound immediately before the engine fires it.
+local function installBurstSoundGuard()
+    if not okROF or not RateOfFire or type(RateOfFire.startBurst) ~= "function" then return end
+    if GOMHomemade._burstSoundGuardInstalled then return end
+    GOMHomemade._burstSoundGuardInstalled=true
+    local originalStartBurst=RateOfFire.startBurst
+    RateOfFire.startBurst=function(player,weapon,intervalMs,attackHook,chargeDelta)
+        local guardedHook=attackHook
+        if type(attackHook)=="function" then
+            guardedHook=function(p,cd,w)
+                enforceAttachmentSound(w)
+                return attackHook(p,cd,w)
+            end
+        end
+        enforceAttachmentSound(weapon)
+        return originalStartBurst(player,weapon,intervalMs,guardedHook,chargeDelta)
+    end
+    print("[GOM HS] Fix 3.14 Gunworks burst sound guard installed")
+end
+installBurstSoundGuard()
+
+-- RealAuto and the FIRST round of RealBurst still travel through Hook.Attack.
+-- Install this after Gunworks' own OnGameStart hook replacement, so the sound
+-- state is fixed at the last possible Lua point immediately before the shot.
+local function installAttackSoundGuard()
+    if not Hook or not Hook.Attack or not ISReloadWeaponAction then return end
+    local target=ISReloadWeaponAction.RAFattackHook or ISReloadWeaponAction.attackHook
+    if type(target)~="function" then return end
+    if GOMHomemade._attackSoundGuardInstalled then return end
+
+    local guarded=function(character,chargeDelta,weapon)
+        enforceAttachmentSound(weapon)
+        return target(character,chargeDelta,weapon)
+    end
+
+    local okRemove=pcall(function() Hook.Attack.Remove(target) end)
+    local okAdd=pcall(function() Hook.Attack.Add(guarded) end)
+    if okAdd then
+        GOMHomemade._attackSoundGuardInstalled=true
+        GOMHomemade._attackSoundGuard=guarded
+        print("[GOM HS] Fix 3.14 global attack sound guard installed")
+    elseif okRemove then
+        -- Defensive fallback: never leave the attack hook removed if adding our
+        -- wrapper unexpectedly fails on another Gunworks build.
+        pcall(function() Hook.Attack.Add(target) end)
+    end
+end
+Events.OnGameStart.Add(installAttackSoundGuard)
+
+local function playCriticalFailureWhistle(player)
+    if not player or not player.playSound then return end
+    pcall(function() player:playSound("GOMHS_SuppressorFailureWhistle") end)
+end
+
+local function playBrokenMetalWhistle(player)
+    if not player or not player.playSound then return end
+    pcall(function() player:playSound("GOMHS_SuppressorBrokenWhistle") end)
+end
+
 local function processShot(player,weapon)
-    enforceSuppressorSound(weapon)
+    enforceAttachmentSound(weapon)
     if not player or not weapon or not instanceof(weapon,"HandWeapon") or not weapon:isRanged() then return end
     local part=getCanon(weapon); if not part then return end
-    local info=TYPE_STATE[part:getFullType()]; if not info or info.state=="broken" then return end
+    local info=TYPE_STATE[part:getFullType()]; if not info then return end
+    if info.state=="broken" then
+        if info.kind=="can" or info.kind=="pipe" then
+            -- Permanent penalty while the broken metal suppressor is still mounted:
+            -- native/louder weapon report from stats + a stronger whistle on EVERY shot.
+            enforceAttachmentSound(weapon)
+            playBrokenMetalWhistle(player)
+        end
+        return
+    end
     local cfg=CFG[info.kind]; initPart(part,player,cfg)
     if info.state=="critical" or part:getCondition()<=1 then
+        -- Audible cue on the actual final shot. Gameplay noise/radius is also
+        -- already 20 percentage points less suppressed in the critical state.
+        playCriticalFailureWhistle(player)
         part:setCondition(0); part:setBroken(true)
         if cfg.autoDrop then dropBrokenPlastic(player,weapon,part,cfg) else swap(player,weapon,part,cfg.brokenType,0,true) end
         return
@@ -208,7 +308,7 @@ local counter=0
 local function periodic(player)
     if not player then return end
     local held=player:getPrimaryHandItem()
-    if held and instanceof(held,"HandWeapon") then enforceSuppressorSound(held) end
+    if held and instanceof(held,"HandWeapon") then enforceAttachmentSound(held) end
     counter=counter+1; if counter<60 then return end; counter=0
     autoLearn(player)
     local weapon=player:getPrimaryHandItem()
@@ -221,4 +321,4 @@ local function periodic(player)
     end
 end
 Events.OnPlayerUpdate.Add(periodic)
-print("[GOM HS] Fix 3.11 core loaded - automatic-fire suppressor fail-safe active")
+print("[GOM HS] Fix 3.14 core loaded - burst/auto audio guard + broken-metal whistle active")

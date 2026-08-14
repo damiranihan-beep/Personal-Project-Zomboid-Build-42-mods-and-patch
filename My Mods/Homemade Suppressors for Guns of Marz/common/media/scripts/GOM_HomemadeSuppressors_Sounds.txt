@@ -1,0 +1,22 @@
+module Base
+{
+    sound GOMHS_SuppressorFailureWhistle
+    {
+        category = Weapon,
+        clip
+        {
+            file = media/sound/GOMHS_SuppressorFailureWhistle.wav,
+            distanceMax = 18,
+        }
+    }
+
+    sound GOMHS_SuppressorBrokenWhistle
+    {
+        category = Weapon,
+        clip
+        {
+            file = media/sound/GOMHS_SuppressorBrokenWhistle.wav,
+            distanceMax = 24,
+        }
+    }
+}
