@@ -2,7 +2,7 @@
 Обновлено: 14.08.2026 14:xx
 
 [x] Архитектура разделена на 3 независимых GoM-модуля.
-[x] Homemade Suppressors 3.12: удалены optic rebalance, tooltip provider, ItemTooltipsTable override, MarzCompatibilityData и UI_HS_* UI-слой.
+[x] Homemade Suppressors 3.14 TEST: удалены optic rebalance, tooltip provider, ItemTooltipsTable override, MarzCompatibilityData и UI_HS_* UI-слой.
 [x] Attachment Rebalance 1.0: PL-4/PS-1/PM-2/PRL-1 = 1/3/6/10% hit+crit+sight; tooltip патчит только 4 записи.
 [x] WATC 1.5: MountOn не мутируется; provider из Homemade Suppressors больше не нужен.
 [?] WATC 1.5: PL-4 / Reflex S2 — длинная строка вправо должна исчезнуть, а список конкретных моделей появиться вертикально вниз.
@@ -15,3 +15,21 @@
 [x] Realistic Combat 3.5 и остальные проекты сохранены без изменений в этом проходе.
 
 Примечание: повторяющиеся отчёты/описания внутри полного GitHub-ready архива сохранены намеренно.
+
+
+=== LIVE TEST 14.08.2026 — SUPPRESSOR ===
+[x] Лог подтвердил конкретную причину пропажи сломанного пластика: `instanceItem(HomemadePlasticSuppressor_Broken)` падал в `WeaponPart.setMountOn`, потому что broken-состояние не имело MountOn.
+[x] Fix 3.13: MountOn добавлен всем broken WeaponPart.
+[x] Fix 3.13: после swap/detach принудительно вызывается Gunworks `StatsFactory.ReapplyAllModifiers`, чтобы critical/broken/removed состояния реально применяли свои значения.
+[x] Fix 3.13: при активном MarzGuns Sound Overhaul используется его `*_silence` звук конкретного оружия; CapGun оставлен только fallback.
+[x] Fix 3.13: на последний критический выстрел добавлен короткий свист/шипение.
+[?] LIVE: повторить полную очередь, услышать отсутствие обычного выстрела, услышать свист на последнем, увидеть broken plastic на полу/в инвентаре fallback.
+
+
+=== LIVE TEST 14.08.2026 — РЕЗУЛЬТАТ FIX 3.13 / ПЕРЕХОД К 3.14 ===
+[x] Пользователь подтвердил: игровой радиус рабочего пластикового глушителя корректен — дальние зомби больше не реагируют как на обычный выстрел.
+[x] Пользователь подтвердил: отдельный свист на последнем критическом выстреле слышен.
+[x] Пользователь подтвердил: сломанный пластиковый глушитель появляется на полу и повторно не устанавливается.
+[!] Осталось: слышимый обычный отчёт оружия всё ещё иногда проскальзывает внутри серии/очереди, хотя игровой шум остаётся подавленным.
+[?] Fix 3.14 TEST: добавлен guard непосредственно в Gunworks RealBurst + поздний OnPlayerUpdate guard после MarzGuns Sound Overhaul.
+[?] Fix 3.14 TEST: сломанный баночный/трубный на каждом выстреле дают усиленный свист и принудительно возвращают обычный звук оружия; игровой шум остаётся 110% от штатного.

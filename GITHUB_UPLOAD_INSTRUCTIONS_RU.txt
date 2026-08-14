@@ -1,16 +1,11 @@
-ОБНОВЛЕНИЕ РЕПОЗИТОРИЯ — ВАЖНО
+GITHUB READY — ОБНОВЛЕНИЕ 14.08.2026
 
-Это полный GitHub-ready архив общего репозитория.
+Загружать содержимое архива в корень общего репозитория с сохранением путей.
 
-1. Не накладывать только отдельные Lua поверх старых папок: удалить/заменить папки проектов целиком, чтобы старые overrides не остались.
-2. Особенно полностью заменить:
-   My Mods/Homemade Suppressors for Guns of Marz
-   My Patch Mods/Weapon Attachment Tooltip Cleaner
-3. Добавить новую папку:
-   My Patch Mods/Guns of Marz Attachment Rebalance
-4. В Homemade Suppressors больше НЕ должно быть:
-   common/media/lua/client/MarzWeapons/*
-   30_AttachmentRebalance.lua
-   UI_HS_Optic_* / UI_HS_Compat_*
-5. В WATC не должно быть старого ZZZ_WeaponAttachmentTooltipCleaner.lua и никакого setMountOn.
-6. После замены обновить корневые README/отчёты из архива.
+Актуальные изменённые проекты этого пакета:
+- My Mods/Homemade Suppressors for Guns of Marz — 3.15 TEST (механика = 3.14, tooltip update)
+- My Mods/Russian Translation Collection for Mods — 4.4.1
+- My Patch Mods/Guns of Marz Attachment Rebalance — 1.0.1
+- My Patch Mods/Weapon Attachment Tooltip Cleaner — 2.1 TEST
+
+Остальные папки общего репозитория сохранены, а не выброшены из GitHub-ready пакета.

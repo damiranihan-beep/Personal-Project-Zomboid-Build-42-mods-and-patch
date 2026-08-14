@@ -1,6 +1,6 @@
 THREE-MODULE SPLIT VALIDATION
 
-Homemade Suppressors 3.12
+Homemade Suppressors 3.13
 [PASS] no PL4/PS1/PM2/PRL1 rebalance code
 [PASS] no ItemTooltipsTable override
 [PASS] no WATC provider/require

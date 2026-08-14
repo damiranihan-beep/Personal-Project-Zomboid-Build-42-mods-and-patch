@@ -4,7 +4,7 @@ Date: 2026-08-14
 
 ## GoM architecture split
 
-### Homemade Suppressors — Fix 3.12
+### Homemade Suppressors — Fix 3.13
 - Contains only the three homemade suppressors and their gameplay systems.
 - No optic rebalance.
 - No copied `MarzWeapons/ItemTooltipsTable.lua`.
@@ -40,3 +40,16 @@ Date: 2026-08-14
 4. Picatinny rail: exact models vertical.
 5. Hover 20–30 seconds without ERROR growth.
 6. Suppressor automatic fire and break behavior unchanged.
+
+
+## Icon fix 14.08.2026
+- Guns of Marz Attachment Rebalance v1.0.1: собственная иконка прицела/ребаланса.
+- Weapon Attachment Tooltip Cleaner v1.7 TEST: low-byte фильтр исходного «Можно закрепить на», русский вертикальный список, локализованные GoM-статы и восстановление вместимости магазинов.
+- Homemade Suppressors сохраняет свою иконку глушителей.
+
+## WATC v1.7 live-fix note — 14.08.2026
+- Исправлен дублирующийся старый MountOn-row через точное распознавание low-byte кириллицы + model-name fallback.
+- RU-заголовок совместимости больше не имеет английского fallback.
+- Обычные GoM stat/info строки повторно локализуются через существующие UI_MRT keys.
+- Магазины получают current/max, если runtime API отдаёт current; иначе показывается достоверная max capacity из GoM item ID.
+- MountOn/совместимость/статы не мутируются.

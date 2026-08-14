@@ -3,7 +3,7 @@ FINAL STATIC VALIDATION — B42.20.2 — SPLIT BUILD
 Status: PASS (static)
 
 Checks:
-- Homemade Suppressors 3.12 contains only suppressor gameplay + its own translations/assets: OK
+- Homemade Suppressors 3.13 contains only suppressor gameplay + its own translations/assets: OK
 - HS MarzWeapons tooltip override/provider absent: OK
 - HS optic rebalance absent: OK
 - active UI_HS_* keys absent: OK

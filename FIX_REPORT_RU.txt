@@ -1,7 +1,7 @@
 PROJECT ZOMBOID 42.20.2 — РАЗДЕЛЕНИЕ GUNS OF MARZ МОДУЛЕЙ
 Дата: 14.08.2026
 
-1) Homemade Suppressors Fix 3.12
+1) Homemade Suppressors Fix 3.13
 - Только три самодельных глушителя.
 - Удалён ребаланс прицелов.
 - Удалён весь код, подменявший/поставлявший tooltip чужих насадок.

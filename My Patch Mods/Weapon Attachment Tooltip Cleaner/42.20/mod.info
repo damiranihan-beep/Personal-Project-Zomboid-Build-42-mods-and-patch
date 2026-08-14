@@ -1,11 +1,11 @@
 name=Weapon Attachment Tooltip Cleaner
 id=WeaponAttachmentTooltipCleaner
-version=1.5
-modversion=7
+version=2.1
+modversion=12
 versionMin=42.20.2
-description=UI-only Build 42.20.2 patch for Guns of Marz attachment compatibility. Hides the original long horizontal 'Can attach to' row and redraws the same compatible weapon models vertically. Never mutates MountOn, stats, recipes or suppressor mechanics.
+description=Native-tooltip UI patch for Guns of Marz. Shows exact compact weapon models for magazines/attachments and localizes GoM custom Information/stat lines while preserving native ammo, capacity, weight and item data. Temporary render-only presentation changes are restored immediately.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
 require=MarzGuns
-loadModAfter=HBVCEFb42,MarzGuns,GOM_AttachmentRebalance,GOM_HomemadeSuppressors
+loadModAfter=HBVCEFb42,SWMG,MarzGuns,GOM_AttachmentRebalance,GOM_HomemadeSuppressors

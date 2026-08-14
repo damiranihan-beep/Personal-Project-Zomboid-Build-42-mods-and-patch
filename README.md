@@ -1,23 +1,23 @@
 # Personal Project Zomboid Build 42 Mods and Patches
 
-Target: **Project Zomboid Build 42.20.2**  
-Architecture split: **2026-08-14**
+Target: **Project Zomboid Build 42.20.2**
 
 ## My Mods
-- Homemade Suppressors for Guns of Marz — **Fix 3.12** — only the three homemade suppressors.
-- Realistic Combat — **Fix 3.5**
-- Russian Translation Collection for Mods — **v4.4.0**
+- Russian Translation Collection for Mods — **v4.4.1** — consolidated Russian localization fixes.
+- Homemade Suppressors for Guns of Marz — **Fix 3.15 TEST** — three homemade suppressors only; mechanics are the tested Fix 3.14 baseline, v3.15 changes tooltip text only.
+- Realistic Combat — preserved unchanged from the repository history.
 
 ## My Patch Mods
-- Guns of Marz Attachment Rebalance — **v1.0** — optic/attachment balance only.
-- Weapon Attachment Tooltip Cleaner — **v1.5 TEST** — compatibility tooltip UI only.
-- SmokingUniversalPatch — **v1.4.3**
+- SmokingUniversalPatch — preserved unchanged.
+- Guns of Marz Attachment Rebalance — **v1.0.1** — PL-4 / PS-1 / PM-2 / PRL-1 balance and only their matching descriptions.
+- Weapon Attachment Tooltip Cleaner — **v2.1 TEST** — native GoM tooltip with short exact weapon models, exact magazine model compatibility and Russian GoM info/stat lines.
 
-## New separation
-- `Homemade Suppressors` no longer contains optic rebalance, GoM tooltip tables, compatibility providers or UI_HS optic/compat keys.
-- `Guns of Marz Attachment Rebalance` owns PL-4 / PS-1 / PM-2 / PRL-1 = 1 / 3 / 6 / 10% Hit+Crit+Sight and their four tooltip descriptions.
-- `Weapon Attachment Tooltip Cleaner` hides the original long horizontal `Можно закрепить на ...` row and redraws the exact compatible models vertically, one per line. It never mutates `MountOn`.
+## Separation rule
+- Suppressors own suppressor crafting, compatibility, balance, audio, wear/break behavior and suppressor tooltip text only.
+- Attachment Rebalance owns modified optic numbers only.
+- Weapon Attachment Tooltip Cleaner owns GoM attachment/magazine presentation only and restores all temporary render-time changes immediately.
 
-The package intentionally keeps the full repository structure and may contain repeated reports/instructions. This is deliberate for direct GitHub replacement/update.
-
-See `ARCHITECTURE_SPLIT_RU.md`, `VALIDATION_SPLIT_3_MODS.txt`, `CURRENT_FIXES_AND_TESTS_RU.txt` and the per-mod reports.
+## Current live-test focus
+1. TR-1: `Информация` + Russian stats.
+2. AA-12 / P226 / TEC-9 / STANAG magazines: native ammo/capacity rows stay; generic weapon classes are replaced by concrete model names.
+3. Homemade suppressors: numeric stats are visible; broken plastic says only `Непригоден.`; broken metal suppressors show their actual penalties.

@@ -1,14 +1,11 @@
-# Load order — Build 42.20.2
+# Рекомендуемый порядок для текущих патчей
 
-1. SWMG / Guns of Marz
-2. MarzGunsSoundOverhaul (если включён)
-3. Homemade Suppressors for Guns of Marz Fix 3.12
-4. Guns of Marz Attachment Rebalance v1.0
-5. Weapon Attachment Tooltip Cleaner v1.5 TEST — последний из GoM UI-патчей
-6. Fancy Handwork / FH
-7. Realistic Combat Fix 3.5
-8. Where Are My Zang Cigs + Smoking Sounds Overhaul
-9. Smoking Universal Patch 1.4.3
-10. Russian Translation Collection v4.4.0 — LAST
+1. Hot Brass / Gunworks framework dependencies
+2. Guns of Marz
+3. MarzGuns Sound Overhaul
+4. Guns of Marz Attachment Rebalance v1.0.1
+5. Homemade Suppressors for Guns of Marz v3.15 TEST
+6. Weapon Attachment Tooltip Cleaner v2.1 TEST
+7. Russian Translation Collection for Mods v4.4.1
 
-`loadModAfter` у трёх GoM-проектов выставлен так, чтобы WATC загружался после GoM, ребаланса и глушителей. Homemade Suppressors от WATC больше не зависит.
+`loadModAfter` прописан в mod.info; список нужен главным образом для ручной проверки Mod Load Order Sorter.
