@@ -1,10 +1,10 @@
 name=Russian Translation Collection for Mods
 id=MyRussianTranslations
-description=Audited Russian translation collection for Project Zomboid Build 42.20.2. Translation-only package; gameplay/tooltips logic stays in the owning patch mods. Load after originals and patches.
+description=Audited Russian translation collection for Project Zomboid Build 42.20.2, including narrow runtime localization for hardcoded mod UI/status text. No balance changes. Load after originals and patches.
 poster=poster.png
 icon=icon.png
 author=Personal Translation Collection
-modversion=4.4.3
+modversion=4.5.2
 versionMin=42.20.2
-loadModAfter=MarzGuns,GOM_CoreFixes,MarzGunsSoundOverhaul,GOM_HomemadeSuppressors,RealisticCombat,SmokingUniversalPatchB42202,GOM_AttachmentRebalance,CleanUI,ArmorMakesSense,EQUIPMENT_UI_B42,showweaponstatsplus4213,OpenAllContainers,REORDER_CONTAINERS,P4PickingMeister,LongTermPreservationExtended,LongTermPreservationExtendedUI
+loadModAfter=MarzGuns,GOM_CoreFixes,MarzGunsSoundOverhaul,GOM_HomemadeSuppressors,RealisticCombat,SmokingUniversalPatchB42202,GOM_AttachmentRebalance,RetroDashboard,CleanUI,ArmorMakesSense,EQUIPMENT_UI_B42,showweaponstatsplus4213,OpenAllContainers,REORDER_CONTAINERS,P4PickingMeister,WeaponReloadMenuCleaner,LongTermPreservationExtended,LongTermPreservationExtendedUI
 loadLast=on

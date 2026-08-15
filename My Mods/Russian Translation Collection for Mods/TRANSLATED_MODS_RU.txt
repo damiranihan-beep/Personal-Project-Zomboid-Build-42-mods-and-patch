@@ -1,3 +1,11 @@
+[CURRENT 4.5.2 — 16.08.2026]
+- Banger's Retro Car Dashboard / RetroDashboard 0.2.0 (Workshop 3739256322): покрыты 11/11 собственных ключей текущей версии (4 контекстных + 7 tooltip).
+- Английские состояния `Off`, `On`, `Locked`, `Unlocked`, `Heating`, `Cooling`, `Dashboard backlight` больше не должны появляться при RU-языке.
+
+[CURRENT 4.5.1 — 16.08.2026]
+- Guns of Marz: проверены все 67 актуальных firearm-форм 42.16; у каждой есть компактный тип оружия в имени.
+- P226/Hi-Power/M92FS/M93R/M1911/USP/Desert Eagle/VP70M -> `(пист.)`; S&W 629 -> `(рев.)`; runtime M203/Masterkey получили подствольные типы.
+
 [CURRENT 4.4.3 — 15.08.2026]
 - Синхронизированы I–VII/U названия для Guns of Marz Attachment Rebalance 2.0.0.
 - Сохранены Tooltip_Weapon_LaserRifle/LightRifle/BoosterScope/Shellholder/Bayonet* fallback.
@@ -59,7 +67,7 @@ ID: MyRussianTranslations
 41. Picking Meister
 42. Project Cook
 43. Rain Cleans Blood
-44. Retro Car Dashboard Refreshed
+44. Banger's Retro Car Dashboard (RetroDashboard, Workshop 3739256322)
 45. Show Weapon Stats Plus
 46. SMB Random Spawn
 47. Spongie's Clothing

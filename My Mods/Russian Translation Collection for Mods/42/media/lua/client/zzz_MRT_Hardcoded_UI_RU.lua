@@ -1,5 +1,7 @@
 -- MyRussianTranslations: Russian runtime fixes for mods that draw English text directly in Lua.
--- This file does not alter gameplay logic; it only changes visible labels/text.
+-- This file is limited to localization. Where a mod hardcodes its final status speech
+-- inside a private callback, an equivalent callback is used only to preserve the same state
+-- change while replacing the visible English message with localized text.
 
 local function MRT_T(key)
     if getText then return getText(key) end
@@ -674,8 +676,8 @@ end
 
 
 -- Barricaded World and Project Seasons add several context-menu labels directly
--- from Lua instead of localization files. Translate only these exact labels when
--- ISContextMenu.addOption() receives them; no per-frame scanning is needed.
+-- from Lua instead of localization files. Barricaded World also prints its
+-- protect-building result as a hardcoded English player speech line.
 local MRT_WORLD_CONTEXT_KEYS = {
     ["Unequip All"] = "UI_MRT_UnequipAll",
     ["Check Food Expiry"] = "UI_LTP_CheckExpiry",
@@ -683,11 +685,150 @@ local MRT_WORLD_CONTEXT_KEYS = {
     ["Barricaded World"] = "UI_MRT_Runtime_023",
     ["Enable protection for Door"] = "UI_MRT_Runtime_024",
     ["Enable protection for Window"] = "UI_MRT_Runtime_028",
+    ["Disable protection for Door"] = "UI_MRT_BW_DisableDoor",
+    ["Disable protection for Window"] = "UI_MRT_BW_DisableWindow",
     ["Protect building"] = "UI_MRT_Runtime_025",
     ["Unprotect building"] = "UI_MRT_Runtime_026",
     ["CleanErosion"] = "UI_MRT_Runtime_027",
     ["cleanerosion"] = "UI_MRT_Runtime_027",
 }
+
+local function MRT_BW_setProtection(isoObject, value)
+    if not isoObject or not isoObject.getModData then return end
+    local modData = isoObject:getModData()
+    modData["BarricadedWorld:isPlayerPlaced"] = value and true or nil
+    if isoObject.transmitModData then isoObject:transmitModData() end
+end
+
+local function MRT_BW_protectObjectsOnSquare(square, value)
+    local count = { doors = 0, windows = 0 }
+    if not square or not square.getObjects then return count end
+    local objects = square:getObjects()
+    if not objects then return count end
+
+    for i = 0, objects:size() - 1 do
+        local isoObject = objects:get(i)
+        if isoObject then
+            if instanceof(isoObject, "IsoWindow") then
+                MRT_BW_setProtection(isoObject, value)
+                count.windows = count.windows + 1
+            elseif instanceof(isoObject, "IsoDoor") then
+                MRT_BW_setProtection(isoObject, value)
+                count.doors = count.doors + 1
+            end
+        end
+    end
+    return count
+end
+
+local function MRT_BW_getObjectBuilding(isoObject)
+    if not isoObject or not isoObject.getSquare then return nil end
+    local sq = isoObject:getSquare()
+    if not sq then return nil end
+
+    local room = sq:getRoom()
+    if not room then
+        local adjacent = nil
+        if isoObject.getNorth and isoObject:getNorth() then
+            adjacent = getCell():getGridSquare(sq:getX(), sq:getY() - 1, sq:getZ())
+        else
+            adjacent = getCell():getGridSquare(sq:getX() - 1, sq:getY(), sq:getZ())
+        end
+        if adjacent then room = adjacent:getRoom() end
+    end
+    if not room then return nil end
+
+    local building = room:getBuilding()
+    return building
+end
+
+local function MRT_BW_sayResult(value, doorCount, windowCount)
+    local player = getSpecificPlayer and getSpecificPlayer(0) or nil
+    if not player then return end
+
+    local key = value and "UI_MRT_BW_ProtectedStatus" or "UI_MRT_BW_UnprotectedStatus"
+    local message = nil
+    if getText then
+        local ok, translated = pcall(getText, key, doorCount, windowCount)
+        if ok and translated and translated ~= key then message = translated end
+    end
+    if not message then
+        local action = value and "защита включена" or "защита снята"
+        message = "Баррикадированный мир: " .. action
+            .. ". Дверей: " .. tostring(doorCount)
+            .. ", окон: " .. tostring(windowCount) .. "."
+    end
+    player:Say(message)
+end
+
+-- Localized equivalent of Barricaded World's private setBuildingProtection().
+-- We replace only that callback because the original function ends by emitting
+-- an English sentence which cannot be translated through normal localization.
+local function MRT_BW_setBuildingProtection(isoObject, value)
+    local building = MRT_BW_getObjectBuilding(isoObject)
+    if not building then
+        MRT_BW_setProtection(isoObject, value)
+        return
+    end
+
+    local buildingDef = building:getDef()
+    local roomDefs = buildingDef and buildingDef:getRooms() or nil
+    if not roomDefs then return end
+
+    local cell = getCell()
+    local doorCount = 0
+    local windowCount = 0
+    local visited = {}
+
+    local function processSquare(x, y, z)
+        local key = tostring(x) .. "," .. tostring(y) .. "," .. tostring(z)
+        if visited[key] then return end
+        visited[key] = true
+        local square = cell:getGridSquare(x, y, z)
+        local count = MRT_BW_protectObjectsOnSquare(square, value)
+        doorCount = doorCount + count.doors
+        windowCount = windowCount + count.windows
+    end
+
+    for i = 0, roomDefs:size() - 1 do
+        local roomDef = roomDefs:get(i)
+        local isoRoom = roomDef and roomDef:getIsoRoom() or nil
+        if isoRoom then
+            local squares = isoRoom:getSquares()
+            if squares then
+                for j = 0, squares:size() - 1 do
+                    local square = squares:get(j)
+                    if square then
+                        local x, y, z = square:getX(), square:getY(), square:getZ()
+                        processSquare(x, y, z)
+                        processSquare(x, y + 1, z)
+                        processSquare(x + 1, y, z)
+                    end
+                end
+            end
+        end
+    end
+
+    MRT_BW_sayResult(value, doorCount, windowCount)
+end
+
+local function MRT_translateWorldContextName(name)
+    if type(name) ~= "string" then return name, nil end
+
+    local prefix = ""
+    local core = name
+    if string.sub(core, 1, 7) == "[Host] " then
+        prefix = "[Хост] "
+        core = string.sub(core, 8)
+    elseif string.sub(core, 1, 8) == "[Admin] " then
+        prefix = "[Админ] "
+        core = string.sub(core, 9)
+    end
+
+    local key = MRT_WORLD_CONTEXT_KEYS[core]
+    if key then return prefix .. MRT_T(key), core end
+    return name, core
+end
 
 local MRT_worldContextHooked = false
 local function MRT_installWorldContextPatch()
@@ -697,12 +838,16 @@ local function MRT_installWorldContextPatch()
     end
 
     local oldAddOption = ISContextMenu.addOption
-    ISContextMenu.addOption = function(self, name, ...)
-        if type(name) == "string" then
-            local key = MRT_WORLD_CONTEXT_KEYS[name]
-            if key then name = MRT_T(key) end
+    ISContextMenu.addOption = function(self, name, target, onSelect, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
+        local translatedName, coreName = MRT_translateWorldContextName(name)
+
+        if coreName == "Protect building" or coreName == "Unprotect building" then
+            -- Barricaded World passes the desired boolean as param1. Preserve it,
+            -- replacing only its private callback so the final status line is RU.
+            onSelect = MRT_BW_setBuildingProtection
         end
-        return oldAddOption(self, name, ...)
+
+        return oldAddOption(self, translatedName, target, onSelect, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
     end
 
     MRT_worldContextHooked = true

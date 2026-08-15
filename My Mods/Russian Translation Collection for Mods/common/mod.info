@@ -1,10 +1,10 @@
 name=Russian Translation Collection for Mods
 id=MyRussianTranslations
-description=Russian translations for Build 42.20.2. Load last.
+description=Russian translations plus narrowly scoped runtime localization for hardcoded mod UI/status text on Build 42.20.2. No balance changes. Load last.
 poster=poster.png
 icon=icon.png
 author=Personal Translation Collection
-modversion=4.4.3
+modversion=4.5.2
 versionMin=42.20.2
-loadAfter=MarzGuns,MarzGunsSoundOverhaul,GOM_HomemadeSuppressors,RealisticCombat,SmokingUniversalPatchB42202,GOM_AttachmentRebalance,CleanUI,ArmorMakesSense,EQUIPMENT_UI_B42,showweaponstatsplus4213,OpenAllContainers,REORDER_CONTAINERS,P4PickingMeister,LongTermPreservationExtended,LongTermPreservationExtendedUI
+loadAfter=MarzGuns,MarzGunsSoundOverhaul,GOM_HomemadeSuppressors,RealisticCombat,SmokingUniversalPatchB42202,GOM_AttachmentRebalance,RetroDashboard,CleanUI,ArmorMakesSense,EQUIPMENT_UI_B42,showweaponstatsplus4213,OpenAllContainers,REORDER_CONTAINERS,P4PickingMeister,WeaponReloadMenuCleaner,LongTermPreservationExtended,LongTermPreservationExtendedUI
 loadLast=on

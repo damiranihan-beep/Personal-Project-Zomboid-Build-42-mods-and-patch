@@ -962,6 +962,10 @@ UI_RU = {
     UI_MRT_Runtime_026 = "Снять защиту здания",
     UI_MRT_Runtime_027 = "Очистить от эрозии",
     UI_MRT_Runtime_028 = "Включить защиту окна",
+    UI_MRT_BW_DisableDoor = "Выключить защиту двери",
+    UI_MRT_BW_DisableWindow = "Выключить защиту окна",
+    UI_MRT_BW_ProtectedStatus = "Баррикадированный мир: защита включена. Дверей: %1, окон: %2.",
+    UI_MRT_BW_UnprotectedStatus = "Баррикадированный мир: защита снята. Дверей: %1, окон: %2.",
 
     UI_LTP_CheckExpiry = "Проверить срок годности",
     UI_LTP_StatusFresh = "СВЕЖЕЕ",
