@@ -1,0 +1,6 @@
+UI_RU = {
+    UI_WRMC_UnloadWeapon = "Разрядить оружие",
+    UI_WRMC_MagazineAndChamber = "Магазин и ствол",
+    UI_WRMC_MagazineOnly = "Только магазин",
+    UI_WRMC_ChamberOnly = "Ствол",
+}

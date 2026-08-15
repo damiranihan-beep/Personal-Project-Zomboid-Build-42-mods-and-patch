@@ -1,0 +1,6 @@
+UI_EN = {
+    UI_WRMC_UnloadWeapon = "Unload weapon",
+    UI_WRMC_MagazineAndChamber = "Magazine and chamber",
+    UI_WRMC_MagazineOnly = "Magazine only",
+    UI_WRMC_ChamberOnly = "Chamber",
+}

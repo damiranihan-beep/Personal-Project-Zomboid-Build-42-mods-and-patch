@@ -1,5 +1,26 @@
 Inspect Weapon - Guns of Marz Compatibility
 
+0.6.0 — Fix 4.1
+- Добавлен пункт контекстного меню `Снять все насадки` для оружия Guns of Marz.
+- Массовое снятие требует исправную отвёртку и использует только штатные timed actions; прямого detach/изменения состояния оружия нет.
+- Порядок снятия строится от зависимостей Gunworks: дочерний прицел/модуль снимается раньше планки/адаптера-родителя.
+- Permanent/integrated, Clip, Slide/Pump/Bolt/Lever/Barrel/Animated*, активный underbarrel и родитель с несъёмным ребёнком безопасно пропускаются.
+- Индивидуальное снятие через Inspect Weapon теперь дополнительно проверяет Railing и активный Underbarrel, чтобы не обходить правила обычного Gunworks context menu.
+- По пользовательскому правилу отвёртка требуется и для съёмного bayonet attach/remove. Защищены сами ISBayonetAttach/ISBayonetRemove, поэтому правило действует и через Inspect Weapon, и через обычное меню/radial Gunworks; встроенный штык fold/unfold не затрагивается.
+- Добавлена совместимость с Tidy Up Meister 2.0.4 через его публичный `registerActionPolicy`: `riskyInspectAction` помечен как `ignore`, поэтому осмотр оружия с пола не запускает автоматический возврат предмета.
+- Баланс, статы, MountOn, ammo и состояние оружия не менялись.
+
+0.5.0 — Fix 4
+- Шесть жёстко заданных слотов Inspect Weapon для Guns of Marz заменены модельно-зависимой сеткой.
+- Карта прямых слотов сгенерирована из реальных WeaponPart MountOn исходников Guns of Marz; UniversalAttachment/штык/runtime-детали добавляются по реестрам Gunworks.
+- У Browning Hi-Power больше не рисуются несуществующие «Ремень», «Приклад», «Затыльник».
+- Съёмный магазин отображается как «Магазин» с live-счётчиком; внутренний/несъёмный магазин не притворяется навесным слотом.
+- Планки/адаптеры и другие реальные PartType отображаются как отдельные слоты модели.
+- Перед перестроением окна закрываются старые tooltip; GoM-обвес внутри Inspect Weapon больше не запускает проблемный WeaponPart tooltip-путь, который оставлял красные/битые строки.
+- Скрытые штатные слоты исключены из joypad-навигации.
+- Сохранены Fix 3: отвёртка обязательна, зависимости/несъёмные детали защищены, UniversalAttachment и bayonet используют штатные Gunworks timed actions.
+- Баланс, статы, MountOn, боеприпасы и состояние оружия не менялись.
+
 0.4.0 — Fix 3
 - Fix 2 runtime-check confirmed: magazine count is correct, scopes/rails/bayonets are visible, and the compat layer produced no Inspect Weapon stack exception during the control session.
 - Fixed the one-way attachment flow: empty GoM slots now list compatible parts actually present in player inventory.

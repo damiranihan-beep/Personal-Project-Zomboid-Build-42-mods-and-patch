@@ -1,4 +1,10 @@
 UI_EN = {
+    UI_GOMIW_SLOT_Canon = "Barrel",
+    UI_GOMIW_SLOT_Clip = "Magazine",
+    UI_GOMIW_SLOT_RecoilPad = "Recoil pad",
+    UI_GOMIW_SLOT_Scope = "Optic",
+    UI_GOMIW_SLOT_Sling = "Sling",
+    UI_GOMIW_SLOT_Stock = "Stock",
     UI_GOMIW_SLOT_RailUp = "Top rail",
     UI_GOMIW_SLOT_RailDown = "Bottom rail",
     UI_GOMIW_SLOT_RailLeft = "Left rail",
@@ -26,6 +32,9 @@ UI_EN = {
     UI_GOMIW_REQUIREMENTS = "installation requirements not met",
     UI_GOMIW_NO_CANDIDATES = "No compatible parts in inventory",
     UI_GOMIW_REMOVE_DEPENDENTS = "remove dependent attachment first",
+    UI_GOMIW_EXIT_UNDERBARREL = "exit underbarrel mode first",
+    UI_GOMIW_DETACH_ALL = "Remove all attachments",
+    UI_GOMIW_DETACH_ALL_DESC = "Removes every safely detachable attachment in Gunworks dependency order. A screwdriver is required.",
     UI_GOMIW_ATTACH = "Attach",
     UI_GOMIW_DETACH = "Detach",
 }

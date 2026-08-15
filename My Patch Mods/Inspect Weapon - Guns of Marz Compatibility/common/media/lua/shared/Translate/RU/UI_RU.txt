@@ -1,4 +1,10 @@
 UI_RU = {
+    UI_GOMIW_SLOT_Canon = "Ствол",
+    UI_GOMIW_SLOT_Clip = "Магазин",
+    UI_GOMIW_SLOT_RecoilPad = "Затыльник",
+    UI_GOMIW_SLOT_Scope = "Прицел",
+    UI_GOMIW_SLOT_Sling = "Ремень",
+    UI_GOMIW_SLOT_Stock = "Приклад",
     UI_GOMIW_SLOT_RailUp = "Верхняя планка",
     UI_GOMIW_SLOT_RailDown = "Нижняя планка",
     UI_GOMIW_SLOT_RailLeft = "Левая планка",
@@ -26,6 +32,9 @@ UI_RU = {
     UI_GOMIW_REQUIREMENTS = "не выполнены требования установки",
     UI_GOMIW_NO_CANDIDATES = "Нет подходящих деталей в инвентаре",
     UI_GOMIW_REMOVE_DEPENDENTS = "сначала снимите зависимый обвес",
+    UI_GOMIW_EXIT_UNDERBARREL = "сначала выключите подствольный режим",
+    UI_GOMIW_DETACH_ALL = "Снять все насадки",
+    UI_GOMIW_DETACH_ALL_DESC = "Снимает все съёмные насадки, соблюдая зависимости Gunworks. Требуется отвёртка.",
     UI_GOMIW_ATTACH = "Установить",
     UI_GOMIW_DETACH = "Снять",
 }
