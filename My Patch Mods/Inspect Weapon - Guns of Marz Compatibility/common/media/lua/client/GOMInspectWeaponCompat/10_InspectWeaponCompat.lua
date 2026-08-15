@@ -1,5 +1,5 @@
 -- Inspect Weapon - Guns of Marz Compatibility
--- Fix 4.1 / v0.6.0 / Project Zomboid Build 42.20.2
+-- Fix 4.3 / v0.8.0 / Project Zomboid Build 42.20.2
 --
 -- Goals:
 --   * keep RiskyInspectWeapon's native header/ammo/condition path, while replacing
@@ -22,7 +22,7 @@ local okCore = (riskyUI ~= nil and true) or pcall(require, "risky_inspect_core")
 local okButton = (attachmentButton ~= nil and magazineButton ~= nil and true) or pcall(require, "risky_inspect_button")
 
 if not okCore or riskyUI == nil or not okButton or attachmentButton == nil or magazineButton == nil then
-    print(TAG .. " Fix 4.1: Inspect Weapon UI classes unavailable; compatibility hooks not installed")
+    print(TAG .. " Fix 4.3: Inspect Weapon UI classes unavailable; compatibility hooks not installed")
     return
 end
 
@@ -32,7 +32,16 @@ pcall(require, "TimedActions/ISEquipWeaponAction")
 pcall(require, "ISUI/ISContextMenu")
 pcall(require, "ISUI/ISInventoryPane")
 pcall(require, "ISUI/ISInventoryPaneContextMenu")
+pcall(require, "ISUI/ISPanel")
+pcall(require, "ISUI/ISButton")
+pcall(require, "TimedActions/ISEjectMagazine")
+pcall(require, "TimedActions/ISUnloadBulletsFromFirearm")
+pcall(require, "TimedActions/ISRackFirearm")
+pcall(require, "TimedActions/ISReloadWeaponAction")
+pcall(require, "TimedActions/ISBaseTimedAction")
+pcall(require, "TimedActions/ISInventoryTransferUtil")
 pcall(require, "WeaponSystems/TimedActions/ISBayonetAttach")
+pcall(require, "WeaponSystems/TimedActions/ISBayonetRemove")
 
 local okCapabilities, DirectSlotCapabilities = pcall(require, "GOMInspectWeaponCompat/DirectSlotCapabilities")
 if not okCapabilities or type(DirectSlotCapabilities) ~= "table" then DirectSlotCapabilities = {} end
@@ -145,12 +154,63 @@ local fallbackRU = {
     UI_GOMIW_DETACH_ALL_DESC = "Снимает все съёмные насадки, соблюдая зависимости Gunworks. Требуется отвёртка.",
     UI_GOMIW_ATTACH = "Установить",
     UI_GOMIW_DETACH = "Снять",
+    UI_GOMIW_EMPTY = "Нет насадки",
+    UI_GOMIW_EMPTY_HINT = "Требуется совместимая насадка",
+    UI_GOMIW_BULK = "Оружие — групповые действия",
+    UI_GOMIW_DETACH_ALL_WEAPONS = "Снять насадки со всего оружия",
+    UI_GOMIW_DETACH_ALL_WEAPONS_DESC = "Снимает все доступные съёмные насадки со всех выбранных единиц оружия. Для обычных насадок отвёртка может быть взята из открытого соседнего контейнера.",
+    UI_GOMIW_UNLOAD_ONE = "Разрядить",
+    UI_GOMIW_UNLOAD_ALL_WEAPONS = "Разрядить всё оружие",
+    UI_GOMIW_UNLOAD_ALL_WEAPONS_DESC = "Разряжает все выбранные единицы оружия: извлекает магазины, выгружает патроны и выбрасывает патрон из патронника штатным действием, не уничтожая его.",
 }
 
 local function uiText(key)
-    local text = getText(key)
-    if text and text ~= key then return text end
-    return fallbackRU[key] or key
+    -- Fix 4.3: these private UI strings are display-only.  In the user's RU setup
+    -- another translation wrapper can return mojibake instead of the literal key,
+    -- so merely comparing getText(key) ~= key is not enough.  Prefer our known-good
+    -- UTF-8 Russian fallback for every GOMIW label and never expose raw/internal
+    -- slot initials in the Inspect Weapon window.
+    if fallbackRU[key] then return fallbackRU[key] end
+    local ok, text = pcall(getText, key)
+    if ok and text and text ~= key then return text end
+    return key
+end
+
+local weaponTitleSuffixes = {
+    ["(пист.)"] = "(пистолет)",
+    ["(рев.)"] = "(револьвер)",
+    ["(авт. ДР)"] = "(автоматический дробовик)",
+    ["(П/А ДР)"] = "(полуавтоматический дробовик)",
+    ["(2-ств. ДР)"] = "(двуствольный дробовик)",
+    ["(подств. ДР)"] = "(подствольный дробовик)",
+    ["(ДР)"] = "(дробовик)",
+    ["(ШВ + M203)"] = "(штурмовая винтовка + M203)",
+    ["(ШВ)"] = "(штурмовая винтовка)",
+    ["(ГВ)"] = "(гражданская винтовка)",
+    ["(БВ)"] = "(боевая винтовка)",
+    ["(авт. винт.)"] = "(автоматическая винтовка)",
+    ["(П/А винт.)"] = "(полуавтоматическая винтовка)",
+    ["(винт.)"] = "(винтовка)",
+    ["(болт.)"] = "(болтовая винтовка)",
+    ["(СВ)"] = "(снайперская винтовка)",
+    ["(пулем.)"] = "(пулемёт)",
+    ["(гранатом.)"] = "(гранатомёт)",
+    ["(ПП)"] = "(пистолет-пулемёт)",
+    ["(АП)"] = "(автоматический пистолет)",
+    ["(караб.)"] = "(карабин)",
+}
+
+local function getInspectWeaponDisplayName(weapon)
+    if not weapon or not weapon.getDisplayName then return "" end
+    local ok, displayName = pcall(function() return weapon:getDisplayName() end)
+    if not ok or not displayName then return "" end
+    local name = tostring(displayName)
+    for shortSuffix, fullSuffix in pairs(weaponTitleSuffixes) do
+        if string.sub(name, -#shortSuffix) == shortSuffix then
+            return string.sub(name, 1, #name - #shortSuffix) .. fullSuffix
+        end
+    end
+    return name
 end
 
 local function isMarzWeapon(weapon)
@@ -184,58 +244,150 @@ local function safeFullType(item)
     return value
 end
 
+local function addContainerUnique(out, seen, container)
+    if not container then return end
+    local key = tostring(container)
+    if seen[key] then return end
+    seen[key] = true
+    table.insert(out, container)
+end
+
+local function getAccessibleContainers(character)
+    local out, seen = {}, {}
+    if not character then return out end
+
+    if character.getInventory then
+        addContainerUnique(out, seen, character:getInventory())
+    end
+
+    -- B42's own crafting/context-menu helper contains character inventories plus
+    -- currently accessible surrounding loot containers (crates, cupboards, etc.).
+    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.getContainers then
+        local ok, list = pcall(ISInventoryPaneContextMenu.getContainers, character)
+        if ok and list then
+            local okSize, size = pcall(function() return list:size() end)
+            if okSize and size then
+                for i = 0, size - 1 do
+                    local okGet, container = pcall(function() return list:get(i) end)
+                    if okGet then addContainerUnique(out, seen, container) end
+                end
+            elseif type(list) == "table" then
+                for _, container in ipairs(list) do addContainerUnique(out, seen, container) end
+            end
+        end
+    end
+
+    return out
+end
+
 local function getScrewdriver(character)
-    if not character or not character.getInventory then return nil end
-    local inventory = character:getInventory()
-    if not inventory then return nil end
-    local ok, result = pcall(function()
-        return inventory:getFirstTagEvalRecurse(ItemTag.SCREWDRIVER, predicateNotBroken)
-    end)
-    if not ok then return nil end
-    return result
+    for _, container in ipairs(getAccessibleContainers(character)) do
+        local ok, result = pcall(function()
+            return container:getFirstTagEvalRecurse(ItemTag.SCREWDRIVER, predicateNotBroken)
+        end)
+        if ok and result then return result end
+    end
+    return nil
 end
 
 local function hasScrewdriver(character)
     return getScrewdriver(character) ~= nil
 end
 
--- Gunworks already routes ordinary GoM WeaponParts through script-level
--- CanAttach/CanDetach checks that require a screwdriver. Detachable bayonets use
--- dedicated timed actions and are the one native path that otherwise bypasses
--- that tool rule. Guard the timed actions themselves so the requirement cannot
--- be bypassed through the context menu, radial menu, Inspect Weapon or another
--- caller. Integrated bayonet fold/unfold is intentionally not affected.
-local bayonetToolGuardInstalled = false
-local originalBayonetAttachIsValid = nil
-local originalBayonetRemoveIsValid = nil
-
-local function installBayonetToolGuard()
-    if bayonetToolGuardInstalled then return true end
-    if not ISBayonetAttach or not ISBayonetRemove then return false end
-    if type(ISBayonetAttach.isValid) ~= "function" or type(ISBayonetRemove.isValid) ~= "function" then
-        return false
+local function queueTransferIfNeeded(character, item)
+    if not character or not item then return false end
+    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.transferIfNeeded then
+        local ok = pcall(ISInventoryPaneContextMenu.transferIfNeeded, character, item)
+        return ok
     end
+    return item:getContainer() == character:getInventory()
+end
 
-    originalBayonetAttachIsValid = ISBayonetAttach.isValid
-    originalBayonetRemoveIsValid = ISBayonetRemove.isValid
+-- Bulk attachment removal may temporarily take a weapon from a backpack or an
+-- open nearby crate. The user explicitly wants detached parts to follow that
+-- weapon back instead of being stranded in the main inventory. Queue a normal
+-- inventory transfer *after* the detach action; allowMissingItems is important
+-- because the WeaponPart is still attached when this transfer is constructed.
+local function queueReturnItemToContainer(character, item, destination)
+    if not character or not item or not destination then return false end
+    local main = character:getInventory()
+    if not main or destination == main then return true end
+    if not ISInventoryTransferUtil or not ISInventoryTransferUtil.newInventoryTransferAction then return false end
 
-    ISBayonetAttach.isValid = function(self)
-        if not originalBayonetAttachIsValid(self) then return false end
-        if isMarzWeapon(self.weapon) and not hasScrewdriver(self.character) then return false end
-        return true
-    end
-
-    ISBayonetRemove.isValid = function(self)
-        if not originalBayonetRemoveIsValid(self) then return false end
-        if isMarzWeapon(self.weapon) and not hasScrewdriver(self.character) then return false end
-        return true
-    end
-
-    bayonetToolGuardInstalled = true
+    local ok, action = pcall(ISInventoryTransferUtil.newInventoryTransferAction, character, item, main, destination, nil)
+    if not ok or not action then return false end
+    if action.setAllowMissingItems then pcall(function() action:setAllowMissingItems(true) end) end
+    ISTimedActionQueue.add(action)
     return true
 end
 
-installBayonetToolGuard()
+local function snapshotMainInventoryIds(character, fullType)
+    local ids = {}
+    if not character or not fullType then return ids end
+    local inventory = character:getInventory()
+    if not inventory or not inventory.getItems then return ids end
+    local items = inventory:getItems()
+    if not items then return ids end
+    for i = 0, items:size() - 1 do
+        local item = items:get(i)
+        if item and safeFullType(item) == fullType then
+            local id = item.getID and item:getID() or tostring(item)
+            ids[id] = true
+        end
+    end
+    return ids
+end
+
+-- ISBayonetRemove converts the installed WeaponPart back into a NEW knife item,
+-- so unlike a normal WeaponPart we cannot queue a transfer for the old object.
+-- This zero-time follow-up finds only the newly-created knife and returns it to
+-- the weapon's original container. Gunworks still performs the actual removal.
+local GOMReturnCreatedBayonet = ISBaseTimedAction and ISBaseTimedAction:derive("GOMReturnCreatedBayonet") or nil
+if GOMReturnCreatedBayonet then
+    function GOMReturnCreatedBayonet:isValid() return true end
+    function GOMReturnCreatedBayonet:update() end
+    function GOMReturnCreatedBayonet:start() end
+    function GOMReturnCreatedBayonet:stop() ISBaseTimedAction.stop(self) end
+    function GOMReturnCreatedBayonet:perform()
+        local inventory = self.character and self.character:getInventory() or nil
+        local found = nil
+        if inventory and self.knifeType then
+            local items = inventory:getItems()
+            if items then
+                for i = 0, items:size() - 1 do
+                    local item = items:get(i)
+                    if item and safeFullType(item) == self.knifeType then
+                        local id = item.getID and item:getID() or tostring(item)
+                        if not self.knownIds[id] then
+                            found = item
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        if found then queueReturnItemToContainer(self.character, found, self.destination) end
+        ISBaseTimedAction.perform(self)
+    end
+    function GOMReturnCreatedBayonet:new(character, knifeType, knownIds, destination)
+        local o = ISBaseTimedAction.new(self, character)
+        o.knifeType = knifeType
+        o.knownIds = knownIds or {}
+        o.destination = destination
+        o.maxTime = 0
+        o.stopOnWalk = false
+        o.stopOnRun = false
+        return o
+    end
+end
+
+-- Fix 4.3: a detachable bayonet is intentionally quick-release.  Upstream
+-- Gunworks does not require a screwdriver for ISBayonetAttach/ISBayonetRemove,
+-- so do not add one here.  Fold/deploy behavior of integrated stocks/bayonets
+-- is left entirely to Gunworks.
+local function installBayonetToolGuard()
+    return true
+end
 
 local function getInstalledParts(weapon)
     local byType = {}
@@ -406,10 +558,9 @@ end
 local function getRemovalStatus(character, weapon, part)
     if not part then return false, nil end
 
-    -- The private integration intentionally requires the screwdriver for every
-    -- detachable Guns of Marz attachment path, including the dedicated bayonet
-    -- action which does not require it by itself in upstream Gunworks.
-    if isMarzPart(part) and not hasScrewdriver(character) then
+    -- Normal GoM WeaponParts use a screwdriver.  Detachable bayonets are the
+    -- explicit exception: their dedicated Gunworks action is a quick-release path.
+    if isMarzPart(part) and not isAttachableBayonetPart(part) and not hasScrewdriver(character) then
         return false, uiText("UI_GOMIW_NEED_SCREWDRIVER")
     end
 
@@ -524,8 +675,11 @@ local function collectInventoryEntries(container, out, visited)
 end
 
 local function getInventoryEntries(character)
-    if not character or not character.getInventory then return {} end
-    return collectInventoryEntries(character:getInventory(), {}, {})
+    local out, visited = {}, {}
+    for _, container in ipairs(getAccessibleContainers(character)) do
+        collectInventoryEntries(container, out, visited)
+    end
+    return out
 end
 
 local function isDirectInstallEnabled(character, weapon, part)
@@ -539,12 +693,20 @@ local function isDirectInstallEnabled(character, weapon, part)
         if okOccupied and occupied ~= nil then return false end
     end
 
-    local canAttach = true
-    if part.canAttach then
+    -- MountOn is authoritative for direct WeaponParts.  This closes the vanilla
+    -- B42 loophole where CanAttach only checked for a screwdriver and allowed a
+    -- Beretta rail to be offered for an AR-15.
+    if isMarzPart(part) and not safeMountsOnWeapon(part, weapon) then return false end
+
+    if isMarzPart(part) then
+        -- Every direct GoM WeaponPart currently uses ItemCodeOnTest.hasScrewdriver.
+        -- Our accessible-tool lookup deliberately includes nearby open containers;
+        -- the tool is transferred before the timed action is queued.
+        if not hasScrewdriver(character) then return false end
+    elseif part.canAttach then
         local ok, result = pcall(function() return part:canAttach(character, weapon) end)
-        if ok then canAttach = result == true end
+        if not ok or result ~= true then return false end
     end
-    if not canAttach then return false end
 
     if RequiredAttachment and RequiredAttachment.IsInstallationBlocked then
         local ok, blocked = pcall(RequiredAttachment.IsInstallationBlocked, weapon, fullType)
@@ -620,10 +782,23 @@ local function buildCandidatesForType(character, weapon, requestedType)
                         for _, outcomeType in ipairs(outcomes) do
                             local outcomePart = instanceItem(outcomeType)
                             if outcomePart and instanceof(outcomePart, "WeaponPart") and safePartType(outcomePart) == requestedType then
-                                local enabled = false
-                                if UniversalAttachment.CanInstallOutcome then
-                                    local okEnabled, result = pcall(UniversalAttachment.CanInstallOutcome, weapon, outcomeType, character)
-                                    enabled = okEnabled and result == true
+                                local enabled = screwdriver
+                                if enabled and weapon.getWeaponPart then
+                                    local outcomePartType = safePartType(outcomePart)
+                                    local okOccupied, occupied = pcall(function() return weapon:getWeaponPart(outcomePartType) end)
+                                    if okOccupied and occupied ~= nil then enabled = false end
+                                end
+                                if enabled and UniversalAttachment.IsRegisteredOutcome then
+                                    local okReg, registered = pcall(UniversalAttachment.IsRegisteredOutcome, weapon, outcomeType)
+                                    enabled = okReg and registered == true
+                                end
+                                if enabled and RequiredAttachment and RequiredAttachment.IsInstallationBlocked then
+                                    local okBlocked, blocked = pcall(RequiredAttachment.IsInstallationBlocked, weapon, outcomeType)
+                                    if okBlocked and blocked then enabled = false end
+                                end
+                                if enabled and UpgradeExclusives and UpgradeExclusives.IsBlockedByExclusive then
+                                    local okBlocked, blocked = pcall(UpgradeExclusives.IsBlockedByExclusive, weapon, outcomeType)
+                                    if okBlocked and blocked then enabled = false end
                                 end
                                 local reason = nil
                                 if not enabled then
@@ -661,14 +836,8 @@ local function buildCandidatesForType(character, weapon, requestedType)
                     local okEnabled, result = pcall(Bayonet.CanAttachBayonet, weapon, item)
                     frameworkAllowed = okEnabled and result == true
                 end
-                local screwdriverReady = hasScrewdriver(character)
-                local enabled = frameworkAllowed and screwdriverReady
-                local reason = nil
-                if not screwdriverReady then
-                    reason = uiText("UI_GOMIW_NEED_SCREWDRIVER")
-                elseif not frameworkAllowed then
-                    reason = uiText("UI_GOMIW_REQUIREMENTS")
-                end
+                local enabled = frameworkAllowed
+                local reason = frameworkAllowed and nil or uiText("UI_GOMIW_REQUIREMENTS")
                 addCandidate(candidates, seen, {
                     key = "bayonet:" .. tostring(fullType),
                     kind = "bayonet",
@@ -754,17 +923,7 @@ end
 
 local function moveCandidateToMainInventory(character, candidate)
     if not character or not candidate or not candidate.sourceItem then return false end
-    local main = character:getInventory()
-    local source = candidate.sourceContainer
-    if source and source ~= main then
-        local ok = pcall(function()
-            source:Remove(candidate.sourceItem)
-            main:AddItem(candidate.sourceItem)
-        end)
-        if not ok then return false end
-        candidate.sourceContainer = main
-    end
-    return true
+    return queueTransferIfNeeded(character, candidate.sourceItem)
 end
 
 local function queueReequip(character, weapon)
@@ -780,7 +939,10 @@ end
 
 local function performCandidateInstall(character, weapon, candidate)
     if not character or not weapon or not candidate or not candidate.enabled then return end
-    if not hasScrewdriver(character) then return end
+
+    -- Bring the selected weapon/part in through the same B42 transfer queue used
+    -- by normal inventory actions.  No direct Remove/Add mutation of loot crates.
+    queueTransferIfNeeded(character, weapon)
     if not moveCandidateToMainInventory(character, candidate) then return end
 
     if candidate.kind == "bayonet" then
@@ -789,9 +951,18 @@ local function performCandidateInstall(character, weapon, candidate)
         elseif Bayonet and Bayonet.AttachBayonet then
             -- No unsafe direct fallback: without the framework timed action we
             -- deliberately do nothing rather than bypass synchronization.
-            print(TAG .. " Fix 4.1: ISBayonetAttach unavailable; bayonet install skipped")
+            print(TAG .. " Fix 4.3: ISBayonetAttach unavailable; bayonet install skipped")
         end
         return
+    end
+
+    local screwdriver = getScrewdriver(character)
+    if not screwdriver then return end
+    queueTransferIfNeeded(character, screwdriver)
+    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
+        -- Match vanilla upgrade ergonomics: attachment/off-hand, screwdriver/main.
+        ISInventoryPaneContextMenu.equipWeapon(candidate.sourceItem, false, false, character:getPlayerNum())
+        ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, character:getPlayerNum())
     end
 
     if candidate.kind == "universal" then
@@ -812,6 +983,70 @@ local function performCandidateInstall(character, weapon, candidate)
     end
 end
 
+local GOMCandidatePane = ISPanel:derive("GOMCandidatePane")
+local activeCandidatePanes = {}
+
+function GOMCandidatePane:new(x, y, candidates, character, weapon)
+    local cols = 5
+    local rows = math.max(1, math.ceil(#candidates / cols))
+    local o = ISPanel:new(x, y, cols * 42 + 8, rows * 42 + 8)
+    setmetatable(o, self)
+    self.__index = self
+    o.candidates = candidates or {}
+    o.character = character
+    o.weapon = weapon
+    o.backgroundColor = { r=0, g=0, b=0, a=0.96 }
+    o.borderColor = { r=0.8, g=0.8, b=0.8, a=0.8 }
+    o.origin = riskyInspectWindow and riskyInspectWindow[character:getPlayerNum()] or nil
+    o.buttons = {}
+    return o
+end
+
+function GOMCandidatePane:createChildren()
+    ISPanel.createChildren(self)
+    for index, candidate in ipairs(self.candidates) do
+        local col = (index - 1) % 5
+        local row = math.floor((index - 1) / 5)
+        local button = ISButton:new(4 + col * 42, 4 + row * 42, 40, 40, "", self, GOMCandidatePane.onCandidate)
+        button:initialise()
+        button.candidate = candidate
+        button.enable = candidate.enabled == true
+        if candidate.displayItem and candidate.displayItem.getTexture then
+            local okTex, tex = pcall(function() return candidate.displayItem:getTexture() end)
+            if okTex and tex then button:setImage(tex) end
+        end
+        local displayName = candidate.displayItem and candidate.displayItem:getDisplayName() or candidate.key
+        local tip = tostring(displayName or "")
+        if not candidate.enabled and candidate.reason then
+            tip = tip .. "\n" .. tostring(candidate.reason)
+        end
+        if button.setTooltip then button:setTooltip(tip) end
+        if not candidate.enabled then
+            button.backgroundColorMouseOver = {r=0.35, g=0.35, b=0.35, a=0.35}
+        end
+        self:addChild(button)
+        table.insert(self.buttons, button)
+    end
+end
+
+function GOMCandidatePane:onCandidate(button)
+    local candidate = button and button.candidate or nil
+    if not candidate or not candidate.enabled then return end
+    performCandidateInstall(self.character, self.weapon, candidate)
+    self:close()
+end
+
+function GOMCandidatePane:close()
+    if self.character then activeCandidatePanes[self.character:getPlayerNum()] = nil end
+    self:setVisible(false)
+    self:removeFromUIManager()
+end
+
+function GOMCandidatePane:onMouseDownOutside(x, y)
+    self:close()
+    return true
+end
+
 local function openCandidateMenu(button)
     if not button or not button.character or not button.attachingTo then return end
     local character = button.character
@@ -824,33 +1059,24 @@ local function openCandidateMenu(button)
     local window = riskyInspectWindow and riskyInspectWindow[playerNum] or nil
     if not window then return end
 
-    local x = window:getX() + button:getX() + button:getWidth() + 4
-    local y = window:getY() + button:getY()
-    local context = ISContextMenu.get(playerNum, x, y)
-    context.origin = window
+    if activeCandidatePanes[playerNum] then
+        pcall(function() activeCandidatePanes[playerNum]:close() end)
+    end
 
     if #candidates == 0 then
-        local option = context:addOption(uiText("UI_GOMIW_NO_CANDIDATES"))
-        option.notAvailable = true
-    else
-        for _, candidate in ipairs(candidates) do
-            local name = candidate.displayItem and candidate.displayItem:getDisplayName() or candidate.key
-            if not candidate.enabled and candidate.reason then
-                name = tostring(name) .. " — " .. tostring(candidate.reason)
-            end
-            local option = context:addOption(name, candidate, function(c)
-                performCandidateInstall(character, weapon, c)
-            end)
-            if not candidate.enabled then
-                option.notAvailable = true
-            end
-        end
+        -- Keep the slot itself as the explanation.  Do not open an empty text
+        -- context menu; the UI now uses the author's original icon-grid concept.
+        return
     end
 
-    context:bringToTop()
-    if getJoypadFocus and setJoypadFocus then
-        pcall(function() setJoypadFocus(playerNum, context) end)
-    end
+    local x = window:getX() + button:getX() + button:getWidth() + 4
+    local y = window:getY() + button:getY()
+    local pane = GOMCandidatePane:new(x, y, candidates, character, weapon)
+    pane:initialise()
+    pane:addToUIManager()
+    pane:setVisible(true)
+    pane:bringToTop()
+    activeCandidatePanes[playerNum] = pane
 end
 
 local function removeGoMPart(button)
@@ -871,6 +1097,16 @@ local function removeGoMPart(button)
 
     local partType = safePartType(part) or normalizePartType(button.attachmentType)
     if partType and ISRemoveWeaponUpgrade then
+        -- The Inspect window may be operating on a weapon/tool that originated in
+        -- an open nearby container. Queue the same safe transfer path used by the
+        -- vanilla inventory menu before the removal action starts.
+        queueTransferIfNeeded(character, weapon)
+        local screwdriver = getScrewdriver(character)
+        if not screwdriver then return end
+        queueTransferIfNeeded(character, screwdriver)
+        if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
+            ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, character:getPlayerNum())
+        end
         ISTimedActionQueue.add(ISRemoveWeaponUpgrade:new(character, weapon, partType))
     end
 end
@@ -969,10 +1205,11 @@ if addAttachmentButton then
             local enabled = isDirectInstallEnabled(self.character, self.attachingTo, self.slotItem)
             if not enabled then return end
 
-            if self.container ~= nil then
-                self.container:Remove(self.slotItem)
-                self.character:getInventory():AddItem(self.slotItem)
-            end
+            queueTransferIfNeeded(self.character, self.attachingTo)
+            queueTransferIfNeeded(self.character, self.slotItem)
+            local screwdriver = getScrewdriver(self.character)
+            if not screwdriver then return end
+            queueTransferIfNeeded(self.character, screwdriver)
 
             if ISUpgradeWeapon then
                 ISTimedActionQueue.add(ISUpgradeWeapon:new(self.character, self.attachingTo, self.slotItem))
@@ -989,10 +1226,11 @@ if addAttachmentButton then
             local enabled = isDirectInstallEnabled(self.character, self.attachingTo, self.slotItem)
             if not enabled then return end
 
-            if self.container ~= nil then
-                self.container:Remove(self.slotItem)
-                self.character:getInventory():AddItem(self.slotItem)
-            end
+            queueTransferIfNeeded(self.character, self.attachingTo)
+            queueTransferIfNeeded(self.character, self.slotItem)
+            local screwdriver = getScrewdriver(self.character)
+            if not screwdriver then return end
+            queueTransferIfNeeded(self.character, screwdriver)
 
             if ISUpgradeWeapon then
                 ISTimedActionQueue.add(ISUpgradeWeapon:new(self.character, self.attachingTo, self.slotItem))
@@ -1229,12 +1467,62 @@ local function setupManagedJoypad(ui, slots, repairBtn)
     if ui.currentFocus and ui.currentFocus > (#slots + 1) then ui.currentFocus = 0 end
 end
 
+local safeRepairPartTypes = {
+    RailUp = true, RailDown = true, RailLeft = true, RailRight = true,
+    CanonMount = true,
+}
+
+local function repairInvalidMountState(character, weapon)
+    if not character or not weapon or not isMarzWeapon(weapon) then return end
+    local _, ordered = getInstalledParts(weapon)
+    for _, entry in ipairs(ordered) do
+        local part = entry.part
+        local partType = normalizePartType(entry.partType)
+        if part and safeRepairPartTypes[partType] and isMarzPart(part)
+            and not safeMountsOnWeapon(part, weapon) then
+
+            local isUniversal = false
+            if UniversalAttachment and UniversalAttachment.IsRegisteredOutcome then
+                local okU, result = pcall(UniversalAttachment.IsRegisteredOutcome, weapon, part)
+                isUniversal = okU and result == true
+            end
+
+            local hasChildren = false
+            local fullType = safeFullType(part)
+            if not isUniversal and fullType and RequiredAttachment and RequiredAttachment.GetInstalledChildren then
+                local okC, children = pcall(RequiredAttachment.GetInstalledChildren, weapon, fullType)
+                hasChildren = okC and children ~= nil
+            end
+
+            -- Repair only the simple corrupted rail/adapter state created by the
+            -- old compatibility bug.  Do not tear down dependency trees silently.
+            if not isUniversal and not hasChildren and not isPermanentPart(part, weapon) then
+                local okDetach = pcall(function() weapon:detachWeaponPart(character, part) end)
+                if okDetach then
+                    character:getInventory():AddItem(part)
+                    if sendAddItemToContainer then
+                        pcall(sendAddItemToContainer, character:getInventory(), part)
+                    end
+                    if syncHandWeaponFields then
+                        pcall(syncHandWeaponFields, character, weapon)
+                    end
+                    print(TAG .. " Fix 4.3 repaired invalid saved mount " .. tostring(fullType)
+                        .. " from " .. tostring(safeFullType(weapon)))
+                end
+            end
+        end
+    end
+end
+
 local originalRenderInventory = riskyUI.renderInventory
 function riskyUI:renderInventory()
     cleanupManagedButtons(self)
     originalRenderInventory(self)
 
     local weapon = self.character and self.character:getPrimaryHandItem() or nil
+    if weapon and isMarzWeapon(weapon) then
+        repairInvalidMountState(self.character, weapon)
+    end
     self.gomIwManagedSlots = {}
     self.gomIwExtraSlots = self.gomIwManagedSlots -- compatibility with old cleanup path
 
@@ -1320,9 +1608,10 @@ function riskyUI:renderInventory()
 
         local displayItem = part
         if partType == "Clip" then displayItem = button.slotItem end
-        local name = displayItem and displayItem:getDisplayName() or getText("IGUI_RISKY_NONE")
+        local name = displayItem and displayItem:getDisplayName() or uiText("UI_GOMIW_EMPTY")
         local label = getManagedCategoryLabel(partType)
         local meta = ""
+        if not displayItem then meta = uiText("UI_GOMIW_EMPTY_HINT") end
         if state then meta = uiText("UI_GOMIW_STATE") .. ": " .. state end
         if removalReason then
             if meta ~= "" then meta = meta .. " | " end
@@ -1336,6 +1625,14 @@ function riskyUI:renderInventory()
             xText + getTextManager():MeasureStringX(UIFont.Small, label) + 20,
             xText + getTextManager():MeasureStringX(UIFont.Small, meta) + 20
         )
+    end
+
+    -- Inspect Weapon title: expand the Russian shorthand used by the collection
+    -- translation (e.g. "пист.", "ГВ", "ШВ") into full readable weapon classes.
+    local inspectTitle = getInspectWeaponDisplayName(weapon)
+    if inspectTitle ~= "" then
+        self.panelWidth = math.max(self.panelWidth or 0,
+            getTextManager():MeasureStringX(UIFont.Medium, inspectTitle) + 100)
     end
 
     local rows = math.ceil(#partTypes / 2)
@@ -1354,7 +1651,7 @@ function riskyUI:renderInventory()
         self.gomIwLastLoggedSignature = signature
         local okAmmo, ammo = pcall(function() return weapon:getCurrentAmmoCount() end)
         local okMag, mag = pcall(function() return weapon:getMagazineType() end)
-        print(TAG .. " Fix 4.1 inspect " .. tostring(weapon:getFullType())
+        print(TAG .. " Fix 4.3 inspect " .. tostring(weapon:getFullType())
             .. " ammo=" .. tostring(okAmmo and ammo or "?")
             .. " magazine=" .. tostring(okMag and mag or "?")
             .. " parts=[" .. table.concat(signatureBits, "|") .. "]"
@@ -1372,6 +1669,16 @@ function riskyUI:prerender()
     local weapon = self.character and self.character:getPrimaryHandItem() or nil
     if not weapon or not isMarzWeapon(weapon) then return end
 
+    -- The base mod draws weapon:getDisplayName() with abbreviations. Cover only
+    -- that title line and redraw the expanded title; condition/repair lines stay
+    -- untouched below it.
+    local inspectTitle = getInspectWeaponDisplayName(weapon)
+    if inspectTitle ~= "" and inspectTitle ~= tostring(weapon:getDisplayName()) then
+        local titleClearWidth = math.max(0, (self.panelWidth or self:getWidth() or 420) - 65)
+        self:drawRect(62, 32, titleClearWidth, 22, 0.98, 0, 0, 0)
+        self:drawText(inspectTitle, 65, 35, 1, 1, 1, 1, UIFont.Medium)
+    end
+
     -- Erase only RiskyInspectWeapon's six hardcoded attachment rows. Header,
     -- condition, ammo counters and title remain untouched.
     local clearWidth = math.max(0, (self.panelWidth or self:getWidth() or 420) - 30)
@@ -1382,13 +1689,14 @@ function riskyUI:prerender()
         local x = slot.x + 50
         local displayItem = slot.part
         if slot.partType == "Clip" and slot.button then displayItem = slot.button.slotItem end
-        local name = displayItem and displayItem:getDisplayName() or getText("IGUI_RISKY_NONE")
+        local name = displayItem and displayItem:getDisplayName() or uiText("UI_GOMIW_EMPTY")
         local category = getManagedCategoryLabel(slot.partType)
 
         self:drawText(name, x, slot.y + 1, 1, 1, 1, 1, UIFont.Small)
         self:drawText(category, x, slot.y + 16, 1, 1, 1, 1, UIFont.Small)
 
         local meta = ""
+        if not displayItem then meta = uiText("UI_GOMIW_EMPTY_HINT") end
         if slot.state then meta = uiText("UI_GOMIW_STATE") .. ": " .. slot.state end
         if slot.removalReason then
             if meta ~= "" then meta = meta .. " | " end
@@ -1441,9 +1749,8 @@ local function isRemoveAllCandidate(character, weapon, entry)
     -- For current GoM parts this checks the screwdriver by inventory presence;
     -- dependencies are handled separately below because children can be queued
     -- before their parent in the same bulk operation.
-    if hasScrewdriver(character) and part.canDetach then
-        local okDetach, canDetach = pcall(function() return part:canDetach(character, weapon) end)
-        if okDetach and canDetach ~= true then return false end
+    if not isAttachableBayonetPart(part) and not hasScrewdriver(character) then
+        return false
     end
 
     return true
@@ -1562,57 +1869,79 @@ end
 
 local function queueDetachAll(character, weapon)
     if not character or not weapon or not isMarzWeapon(weapon) then return end
-    local screwdriver = getScrewdriver(character)
-    if not screwdriver then return end
 
     local plan = buildRemoveAllPlan(character, weapon)
     if #plan == 0 then return end
 
-    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.transferIfNeeded then
-        ISInventoryPaneContextMenu.transferIfNeeded(character, weapon)
-    end
+    -- Capture before transferIfNeeded: this is the logical destination for both
+    -- the weapon and every detached accessory when the action came from another
+    -- backpack/loot cell.
+    local originContainer = weapon.getContainer and weapon:getContainer() or nil
+    queueTransferIfNeeded(character, weapon)
 
-    -- The dedicated bayonet action requires the weapon in the primary hand in
-    -- single-player. Keep the native bayonet conversion/condition path, then
-    -- equip the screwdriver for every normal WeaponPart removal.
-    local hasBayonet = false
+    -- Bayonet is quick-release and needs no screwdriver.
+    local hasNormalPart = false
     for _, candidate in ipairs(plan) do
-        if isAttachableBayonetPart(candidate.part) then
-            hasBayonet = true
+        if not isAttachableBayonetPart(candidate.part) then
+            hasNormalPart = true
             break
         end
     end
 
-    if hasBayonet and ISBayonetRemove then
+    local screwdriver = nil
+    if hasNormalPart then
+        screwdriver = getScrewdriver(character)
+        if not screwdriver then return end
+        queueTransferIfNeeded(character, screwdriver)
         if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
-            local twoHands = false
-            if weapon.isTwoHandWeapon then
-                local okTwo, result = pcall(function() return weapon:isTwoHandWeapon() end)
-                twoHands = okTwo and result == true
-            end
-            ISInventoryPaneContextMenu.equipWeapon(weapon, true, twoHands, character:getPlayerNum())
+            ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, character:getPlayerNum())
         end
-        for _, candidate in ipairs(plan) do
-            if isAttachableBayonetPart(candidate.part) then
-                ISTimedActionQueue.add(ISBayonetRemove:new(character, weapon))
-            end
-        end
-    end
-
-    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
-        ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, character:getPlayerNum())
     end
 
     for _, candidate in ipairs(plan) do
-        if not isAttachableBayonetPart(candidate.part) and candidate.partType and ISRemoveWeaponUpgrade then
-            -- Do not call the context-menu wrapper here: it evaluates parent
-            -- dependencies before earlier queued child removals have completed.
-            -- The native timed action + Gunworks isValid re-check them at the
-            -- correct execution time, while our leaf-first plan also preserves
-            -- Railing order and excludes active-underbarrel/permanent parts.
+        if isAttachableBayonetPart(candidate.part) then
+            if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
+                local twoHands = weapon.isTwoHandWeapon and weapon:isTwoHandWeapon() or false
+                ISInventoryPaneContextMenu.equipWeapon(weapon, true, twoHands, character:getPlayerNum())
+            end
+            if ISBayonetRemove then
+                local knifeType = nil
+                if Bayonet and Bayonet.GetKnifeTypeFromAttachment then
+                    local okKnife, result = pcall(Bayonet.GetKnifeTypeFromAttachment, safeFullType(candidate.part))
+                    if okKnife then knifeType = result end
+                end
+                local knownIds = snapshotMainInventoryIds(character, knifeType)
+                ISTimedActionQueue.add(ISBayonetRemove:new(character, weapon))
+                if originContainer and originContainer ~= character:getInventory() and knifeType and GOMReturnCreatedBayonet then
+                    ISTimedActionQueue.add(GOMReturnCreatedBayonet:new(character, knifeType, knownIds, originContainer))
+                end
+            end
+        elseif candidate.partType and ISRemoveWeaponUpgrade then
             ISTimedActionQueue.add(ISRemoveWeaponUpgrade:new(character, weapon, candidate.partType))
+            queueReturnItemToContainer(character, candidate.part, originContainer)
         end
     end
+end
+
+local function getActualContextWeapons(items)
+    if not items then return {} end
+    local actual = items
+    if ISInventoryPane and ISInventoryPane.getActualItems then
+        local ok, resolved = pcall(ISInventoryPane.getActualItems, items)
+        if ok and type(resolved) == "table" then actual = resolved end
+    end
+
+    local out, seen = {}, {}
+    for _, item in ipairs(actual) do
+        if item and instanceof(item, "HandWeapon") then
+            local id = item.getID and item:getID() or tostring(item)
+            if not seen[id] then
+                seen[id] = true
+                table.insert(out, item)
+            end
+        end
+    end
+    return out
 end
 
 local function getSingleContextWeapon(items)
@@ -1633,85 +1962,227 @@ local function getSingleContextWeapon(items)
     return found
 end
 
-local function markContextOptionNeedsScrewdriver(context, option)
-    if not option then return end
-    option.notAvailable = true
+local function guardBayonetContextOptions(playerNum, context, items)
+    -- Fix 4.3: intentionally no screwdriver gate for detachable bayonets.
+end
 
-    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
-        local tooltip = option.toolTip or ISInventoryPaneContextMenu.addToolTip()
-        tooltip.description = uiText("UI_GOMIW_NEED_SCREWDRIVER")
-        option.toolTip = tooltip
-    end
-
-    -- Gunworks creates a submenu when more than one compatible bayonet knife is
-    -- available. Disable its children as well, so single-menu and classic menu
-    -- modes behave identically.
-    if option.subOption and context and context.getSubMenu then
-        local okSub, subMenu = pcall(function() return context:getSubMenu(option.subOption) end)
-        if okSub and subMenu and subMenu.options then
-            for _, subOption in ipairs(subMenu.options) do
-                subOption.notAvailable = true
-                if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
-                    local subTip = subOption.toolTip or ISInventoryPaneContextMenu.addToolTip()
-                    subTip.description = uiText("UI_GOMIW_NEED_SCREWDRIVER")
-                    subOption.toolTip = subTip
-                end
-            end
+local function queueDetachAllWeapons(character, weapons)
+    if not character or type(weapons) ~= "table" then return end
+    for _, weapon in ipairs(weapons) do
+        if isMarzWeapon(weapon) then
+            queueDetachAll(character, weapon)
         end
     end
 end
 
-local function guardBayonetContextOptions(playerNum, context, items)
-    if not context or not items then return end
-    local weapon = getSingleContextWeapon(items)
-    if not weapon then return end
+local function weaponNeedsUnload(weapon)
+    if not weapon or not instanceof(weapon, "HandWeapon") or not weapon:isRanged() then return false end
+    local hasClip = weapon.isContainsClip and weapon:isContainsClip() or false
+    local count = weapon.getCurrentAmmoCount and weapon:getCurrentAmmoCount() or 0
+    local chambered = weapon.haveChamber and weapon:haveChamber()
+        and weapon.isRoundChambered and weapon:isRoundChambered() or false
+    local jammed = weapon.isJammed and weapon:isJammed() or false
+    return hasClip or (count and count > 0) or chambered or jammed
+end
 
-    local character = getSpecificPlayer(playerNum)
-    if not character or hasScrewdriver(character) then return end
+local function queueUnloadWeapon(character, weapon)
+    if not character or not weapon or not weaponNeedsUnload(weapon) then return end
+    queueTransferIfNeeded(character, weapon)
 
-    -- These are the exact keys used by Gunworks' own context-menu entries. The
-    -- timed-action guard above is the authoritative safety check; this layer is
-    -- only the user-facing disabled state and explanation.
-    if context.getOptionFromName then
-        markContextOptionNeedsScrewdriver(context, context:getOptionFromName(getText("IGUI_AttachBayonet")))
-        markContextOptionNeedsScrewdriver(context, context:getOptionFromName(getText("IGUI_RemoveBayonet")))
+    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.equipWeapon then
+        ISInventoryPaneContextMenu.equipWeapon(weapon, true, false, character:getPlayerNum())
+    end
+
+    local hasMagazineType = weapon.getMagazineType and weapon:getMagazineType() ~= nil
+    local containsClip = weapon.isContainsClip and weapon:isContainsClip() or false
+    local ammoCount = weapon.getCurrentAmmoCount and weapon:getCurrentAmmoCount() or 0
+
+    if hasMagazineType and containsClip and ISEjectMagazine then
+        ISTimedActionQueue.add(ISEjectMagazine:new(character, weapon))
+    elseif not hasMagazineType and ammoCount and ammoCount > 0 and ISUnloadBulletsFromFirearm then
+        ISTimedActionQueue.add(ISUnloadBulletsFromFirearm:new(character, weapon))
+    end
+
+    -- Vanilla ISRackFirearm:removeBullet() creates the ammo item in the player's
+    -- inventory.  This is deliberately used instead of mutating chamber state so
+    -- a chambered cartridge can never silently disappear.
+    local canRack = false
+    if ISReloadWeaponAction and ISReloadWeaponAction.canRack then
+        local ok, result = pcall(ISReloadWeaponAction.canRack, weapon)
+        canRack = ok and result == true
+    end
+    if (canRack or (weapon.isJammed and weapon:isJammed())) and ISRackFirearm then
+        ISTimedActionQueue.add(ISRackFirearm:new(character, weapon))
     end
 end
 
-local function addDetachAllContextOption(playerNum, context, items)
-    if not context or not items then return end
-    local weapon = getSingleContextWeapon(items)
-    if not weapon then return end
+local function queueUnloadAllWeapons(character, weapons)
+    if not character or type(weapons) ~= "table" then return end
+    for _, weapon in ipairs(weapons) do
+        queueUnloadWeapon(character, weapon)
+    end
+end
 
+local function addBulkWeaponContextOptions(playerNum, context, items)
+    if not context or not items then return end
     local character = getSpecificPlayer(playerNum)
     if not character then return end
 
-    local plan = buildRemoveAllPlan(character, weapon)
-    if #plan == 0 then return end
+    local weapons = getActualContextWeapons(items)
+    if #weapons == 0 then return end
 
-    local optionName = uiText("UI_GOMIW_DETACH_ALL")
-    local removeName = getText("ContextMenu_Remove_Weapon_Upgrade")
-    local option = nil
-    if context.getOptionFromName and context:getOptionFromName(removeName) and context.insertOptionAfter then
-        option = context:insertOptionAfter(removeName, optionName, character, queueDetachAll, weapon)
-    else
-        option = context:addOption(optionName, character, queueDetachAll, weapon)
+    local marzWeapons = {}
+    local hasDetach = false
+    local hasUnload = false
+    for _, weapon in ipairs(weapons) do
+        if isMarzWeapon(weapon) then
+            table.insert(marzWeapons, weapon)
+            if #buildRemoveAllPlan(character, weapon) > 0 then hasDetach = true end
+        end
+        if weaponNeedsUnload(weapon) then hasUnload = true end
     end
 
-    if option and ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
-        option.toolTip = ISInventoryPaneContextMenu.addToolTip()
-        option.toolTip.description = uiText("UI_GOMIW_DETACH_ALL_DESC")
+    if not hasDetach and not hasUnload then return end
+
+    -- Single weapon: keep the menu compact and human-readable.  Do not append
+    -- the weapon name to "Разрядить" — the selected row already tells the user
+    -- what weapon the action applies to.
+    if #weapons == 1 then
+        local weapon = weapons[1]
+        if hasDetach and isMarzWeapon(weapon) then
+            local opt = context:addOption(uiText("UI_GOMIW_DETACH_ALL"), character, queueDetachAll, weapon)
+            if opt and ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
+                opt.toolTip = ISInventoryPaneContextMenu.addToolTip()
+                opt.toolTip.description = uiText("UI_GOMIW_DETACH_ALL_WEAPONS_DESC")
+            end
+        end
+        if hasUnload then
+            local opt = context:addOption(uiText("UI_GOMIW_UNLOAD_ONE"), character, queueUnloadWeapon, weapon)
+            if opt and ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
+                opt.toolTip = ISInventoryPaneContextMenu.addToolTip()
+                opt.toolTip.description = uiText("UI_GOMIW_UNLOAD_ALL_WEAPONS_DESC")
+            end
+        end
+        return
     end
-    if option and not hasScrewdriver(character) then
-        option.notAvailable = true
+
+    -- Grouped/stacked weapons: one parent menu controls every actual item hidden
+    -- behind the inventory stack row.
+    local parent = context:addOption(uiText("UI_GOMIW_BULK"))
+    local sub = context:getNew(context)
+    context:addSubMenu(parent, sub)
+
+    if hasDetach then
+        local opt = sub:addOption(uiText("UI_GOMIW_DETACH_ALL_WEAPONS"), character, queueDetachAllWeapons, marzWeapons)
+        if opt and ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
+            opt.toolTip = ISInventoryPaneContextMenu.addToolTip()
+            opt.toolTip.description = uiText("UI_GOMIW_DETACH_ALL_WEAPONS_DESC")
+        end
+    end
+
+    if hasUnload then
+        local opt = sub:addOption(uiText("UI_GOMIW_UNLOAD_ALL_WEAPONS"), character, queueUnloadAllWeapons, weapons)
+        if opt and ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.addToolTip then
+            opt.toolTip = ISInventoryPaneContextMenu.addToolTip()
+            opt.toolTip.description = uiText("UI_GOMIW_UNLOAD_ALL_WEAPONS_DESC")
+        end
     end
 end
 
+-- Harden ISContextMenu against the exact Gunworks/CleanUI stack trace from the
+-- user's log.  Gunworks removes empty attachment submenus; if another UI wrapper
+-- leaves a non-table entry in options, vanilla removeOptionByName dereferences it.
+local safeContextRemoveWrapper = nil
+local function installSafeContextRemove()
+    if not ISContextMenu or type(ISContextMenu.removeOptionByName) ~= "function" then return end
+    if safeContextRemoveWrapper and ISContextMenu.removeOptionByName == safeContextRemoveWrapper then return end
+
+    local wrapper
+    wrapper = function(self, optName)
+        local oldOptions = self.options or {}
+        local newOptions = {}
+        local removed = false
+        local indexed = {}
+
+        -- Do not rely on ipairs here. A previous wrapper can leave sparse numeric
+        -- indices as well as non-table garbage. Rebuild all numeric entries in
+        -- their original order and discard anything that cannot be a menu option.
+        for index, option in pairs(oldOptions) do
+            if type(index) == "number" and type(option) == "table" then
+                table.insert(indexed, { index = index, option = option })
+            end
+        end
+        table.sort(indexed, function(a, b) return a.index < b.index end)
+
+        for _, entry in ipairs(indexed) do
+            local option = entry.option
+            if not removed and option.name == optName then
+                removed = true
+                if self.optionPool then table.insert(self.optionPool, option) end
+            else
+                table.insert(newOptions, option)
+            end
+        end
+
+        self.options = newOptions
+        -- ISContextMenu uses a 1-based next-free-slot counter: after N visible
+        -- options numOptions must be N+1 and option.id must match its array index.
+        self.numOptions = #newOptions + 1
+        for i, option in ipairs(newOptions) do
+            option.id = i
+        end
+        if self.calcHeight then self:calcHeight() end
+        if self.calcWidth and self.setWidth then self:setWidth(self:calcWidth()) end
+    end
+    safeContextRemoveWrapper = wrapper
+    ISContextMenu.removeOptionByName = wrapper
+end
+installSafeContextRemove()
+
+-- Timed-action safety net: direct GoM WeaponParts must obey MountOn even when a
+-- third-party context menu offers them incorrectly.  UniversalAttachment outcomes
+-- use their own registered mapping and are intentionally exempt from this check.
+local upgradeMountGuardWrapper = nil
+local function installUpgradeMountGuard()
+    if not ISUpgradeWeapon or type(ISUpgradeWeapon.isValid) ~= "function" then return end
+    if upgradeMountGuardWrapper and ISUpgradeWeapon.isValid == upgradeMountGuardWrapper then return end
+    local previous = ISUpgradeWeapon.isValid
+    local wrapper
+    wrapper = function(self)
+        if not previous(self) then return false end
+        if not self.outcomeFullType and self.weapon and self.part
+            and isMarzWeapon(self.weapon) and isMarzPart(self.part) then
+            if not safeMountsOnWeapon(self.part, self.weapon) then return false end
+        end
+        return true
+    end
+    upgradeMountGuardWrapper = wrapper
+    ISUpgradeWeapon.isValid = wrapper
+end
+installUpgradeMountGuard()
+
+local function suppressTextAttachmentContextForMarz(playerNum, context, items)
+    if not context or not items or not context.removeOptionByName then return end
+    local weapons = getActualContextWeapons(items)
+    local hasMarz = false
+    for _, weapon in ipairs(weapons) do
+        if isMarzWeapon(weapon) then
+            hasMarz = true
+            break
+        end
+    end
+    if not hasMarz then return end
+
+    -- Guns of Marz attachment management is intentionally routed through the
+    -- Inspect Weapon icon grid. The long vanilla/Gunworks text submenus are both
+    -- redundant and were the path that exposed incompatible pistol rails on ARs.
+    pcall(function() context:removeOptionByName(getText("ContextMenu_Add_Weapon_Upgrade")) end)
+    pcall(function() context:removeOptionByName(getText("ContextMenu_Remove_Weapon_Upgrade")) end)
+end
+
 if Events and Events.OnFillInventoryObjectContextMenu then
-    -- Gunworks is loaded before this compatibility mod, so its bayonet entries
-    -- already exist when this handler runs.
-    Events.OnFillInventoryObjectContextMenu.Add(guardBayonetContextOptions)
-    Events.OnFillInventoryObjectContextMenu.Add(addDetachAllContextOption)
+    Events.OnFillInventoryObjectContextMenu.Add(suppressTextAttachmentContextForMarz)
+    Events.OnFillInventoryObjectContextMenu.Add(addBulkWeaponContextOptions)
 end
 
 -- --------------------------------------------------------------------------
@@ -1727,7 +2198,7 @@ local function registerTidyInspectPolicy()
     local ok, result = pcall(api.registerActionPolicy, "riskyInspectAction", { ignore = true })
     if ok and result ~= false then
         tidyPolicyRegistered = true
-        print(TAG .. " Fix 4.1: Tidy Up Meister ignores riskyInspectAction")
+        print(TAG .. " Fix 4.3: Tidy Up Meister ignores riskyInspectAction")
         return true
     end
     return false
@@ -1738,9 +2209,10 @@ end
 registerTidyInspectPolicy()
 
 local function onGameStart()
-    installBayonetToolGuard()
+    installSafeContextRemove()
+    installUpgradeMountGuard()
     registerTidyInspectPolicy()
-    print(TAG .. " Fix 4.1 v0.6.0 loaded - model-aware slots + remove-all + Tidy inspect exclusion + screwdriver-safe Gunworks attachment actions")
+    print(TAG .. " Fix 4.3 v0.8.0 loaded - full slot names + icon attachment picker + nearby tools + MountOn guard + bulk detach/unload")
 end
 
 if Events and Events.OnGameStart then

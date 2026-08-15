@@ -37,4 +37,12 @@ UI_RU = {
     UI_GOMIW_DETACH_ALL_DESC = "Снимает все съёмные насадки, соблюдая зависимости Gunworks. Требуется отвёртка.",
     UI_GOMIW_ATTACH = "Установить",
     UI_GOMIW_DETACH = "Снять",
+    UI_GOMIW_EMPTY = "Нет насадки",
+    UI_GOMIW_EMPTY_HINT = "Требуется совместимая насадка",
+    UI_GOMIW_BULK = "Оружие — групповые действия",
+    UI_GOMIW_DETACH_ALL_WEAPONS = "Снять насадки со всего оружия",
+    UI_GOMIW_DETACH_ALL_WEAPONS_DESC = "Снимает все доступные съёмные насадки со всех выбранных единиц оружия. Для обычных насадок отвёртка может быть взята из открытого соседнего контейнера.",
+    UI_GOMIW_UNLOAD_ONE = "Разрядить",
+    UI_GOMIW_UNLOAD_ALL_WEAPONS = "Разрядить всё оружие",
+    UI_GOMIW_UNLOAD_ALL_WEAPONS_DESC = "Разряжает все выбранные единицы оружия и сохраняет патрон из патронника.",
 }

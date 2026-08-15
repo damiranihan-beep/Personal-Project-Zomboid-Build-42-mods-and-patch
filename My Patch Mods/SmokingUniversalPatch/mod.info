@@ -1,8 +1,8 @@
 name=Smoking Universal Patch 42.20.2
 id=SmokingUniversalPatchB42202
 author=Naodakek + ChatGPT
-description=Compatibility patch for Where Are My Zang Cigs and Smoking Sounds Overhaul on Build 42.20.2. Fixes smoker starting items, preserves the original WAMZ cigarette loot increase without multiplying it twice, and exposes direct smoking from Base.CigarettePack as "Курить с пачки сигарет" through the vanilla 42.20.2 action path so SSO sounds remain intact. Does not replace SSO timed-action wrappers and does not return items to their previous container. Adds vanilla merging for partially used refillable/disposable lighters.
-modversion=1.4.3
+description=Compatibility patch for Where Are My Zang Cigs and Smoking Sounds Overhaul on Build 42.20.2. Fixes smoker starting items, preserves the original WAMZ cigarette loot increase without multiplying it twice, and exposes direct smoking from grouped Base.CigarettePack stacks as "Курить с пачки сигарет", preferring a partially used non-empty pack while keeping the vanilla 42.20.2 ISTakePillAction path so SSO sounds remain intact. Does not replace SSO timed-action wrappers; the vanilla takePill path keeps its normal ReturnItemToOriginalContainer behavior. Adds vanilla merging for partially used refillable/disposable lighters.
+modversion=1.4.4
 versionMin=42.20.2
 require=SKITTLE_WhereAreMyZangCigs,SmokingSoundsOverhaul
 loadModAfter=SKITTLE_WhereAreMyZangCigs,SmokingSoundsOverhaul

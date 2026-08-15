@@ -1,4 +1,4 @@
--- Smoking Universal Patch 42.20.2 v1.4.2
+-- Smoking Universal Patch 42.20.2 v1.4.4
 -- Direct smoking from Base.CigarettePack without replacing vanilla/SSO TimedActions.
 -- Build 42.20.2 already routes CigarettePack through ISTakePillAction because the
 -- pack is a CONSUMABLE + SMOKABLE DrainableComboItem with CustomContextMenu=Smoke.
@@ -10,65 +10,94 @@ require "ISUI/ISInventoryPaneContextMenu"
 
 local PACK_TYPE = "Base.CigarettePack"
 local PACK_SMOKE_LABEL = getText("ContextMenu_SmokeFromCigarettePack")
+if not PACK_SMOKE_LABEL or PACK_SMOKE_LABEL == "ContextMenu_SmokeFromCigarettePack" then
+    PACK_SMOKE_LABEL = "Курить с пачки сигарет"
+end
 
-local function getSingleSelectedPack(items)
+local function getSelectedPack(items)
     if not items then return nil end
 
     local ok, actualItems = pcall(function()
         return ISInventoryPane.getActualItems(items)
     end)
-    if not ok or not actualItems or #actualItems ~= 1 then return nil end
+    if not ok or not actualItems then return nil end
 
-    local item = actualItems[1]
-    if not item or not item.getFullType then return nil end
-    if item:getFullType() ~= PACK_TYPE then return nil end
-
-    return item
-end
-
-local function renameVanillaPackSmokeOption(context, items, pack)
-    if not context or not context.options then return false end
-
-    for _, option in ipairs(context.options) do
-        if option
-        and option.onSelect == ISInventoryPaneContextMenu.onPillsItems
-        and option.target == items then
-            option.name = PACK_SMOKE_LABEL
-            option.itemForTexture = pack
-            return true
+    -- Grouped inventory rows can contain several CigarettePack instances.
+    -- Prefer a non-empty partially used pack, then any non-empty pack.  This
+    -- avoids the old "two packs = no option" behavior and avoids blindly taking
+    -- the first object from the stack.
+    local anyPack = nil
+    local partialPack = nil
+    for _, item in ipairs(actualItems) do
+        if item and item.getFullType and item:getFullType() == PACK_TYPE then
+            local usable = true
+            local delta = nil
+            if item.getCurrentUsesFloat then
+                local okUses, uses = pcall(function() return item:getCurrentUsesFloat() end)
+                if okUses then
+                    delta = uses
+                    usable = uses > 0
+                end
+            elseif item.getUsedDelta then
+                local okDelta, usedDelta = pcall(function() return item:getUsedDelta() end)
+                if okDelta then
+                    delta = usedDelta
+                    usable = usedDelta > 0
+                end
+            end
+            if usable then
+                anyPack = anyPack or item
+                if delta and delta < 0.999 then
+                    partialPack = partialPack or item
+                end
+            end
         end
     end
+    return partialPack or anyPack
+end
 
-    return false
+local function onSmokeSelectedPack(pack, player)
+    if not pack or not ISInventoryPaneContextMenu.takePill then return end
+    -- Call the vanilla one-item path directly so a grouped stack cannot make
+    -- onPillsItems pick the wrong pack.  Vanilla still handles transfer,
+    -- ISTakePillAction/SSO sound hooks and ReturnItemToOriginalContainer.
+    ISInventoryPaneContextMenu.takePill(pack, player)
+end
+
+local function removeOldPackSmokeOptions(context, items)
+    if not context or not context.options then return end
+    for i = #context.options, 1, -1 do
+        local option = context.options[i]
+        if type(option) == "table"
+        and option.onSelect == ISInventoryPaneContextMenu.onPillsItems
+        and option.target == items
+        and tostring(option.name or "") == tostring(PACK_SMOKE_LABEL) then
+            table.remove(context.options, i)
+        end
+    end
+    for i, option in ipairs(context.options) do
+        if type(option) == "table" then option.id = i end
+    end
+    context.numOptions = #context.options + 1
 end
 
 local function onFillInventoryObjectContextMenu(player, context, items)
-    local pack = getSingleSelectedPack(items)
+    local pack = getSelectedPack(items)
     if not pack then return end
 
-    -- Normal 42.20.2 path: rename the already-created vanilla Smoke option.
-    local found = renameVanillaPackSmokeOption(context, items, pack)
-
-    -- First ask vanilla to build its normal smoke entry. This keeps all standard
-    -- ignition checks whenever vanilla accepts the selected container.
-    if not found and ISInventoryPaneContextMenu.doPillsMenu then
-        ISInventoryPaneContextMenu.doPillsMenu(context, items, player, PACK_SMOKE_LABEL)
-        found = renameVanillaPackSmokeOption(context, items, pack)
-    end
-
-    -- Build 42 may omit CustomContextMenu actions for an item selected from a
-    -- backpack/secondary inventory pane. In that exact case expose the same
-    -- vanilla onPillsItems handler directly. The action itself remains vanilla,
-    -- so SSO still sees only the normal ISTakePillAction path.
-    if not found and context.addOption and ISInventoryPaneContextMenu.onPillsItems then
-        local option = context:addOption(PACK_SMOKE_LABEL, items, ISInventoryPaneContextMenu.onPillsItems, player)
-        if option then
-            option.itemForTexture = pack
-            found = true
+    -- Remove the vanilla grouped-stack handler and expose one deterministic
+    -- action that targets the selected real pack instance.
+    removeOldPackSmokeOptions(context, items)
+    local option = context:addOption(PACK_SMOKE_LABEL, pack, onSmokeSelectedPack, player)
+    if option then
+        option.itemForTexture = pack
+        if pack.getTexture then
+            local okTex, tex = pcall(function() return pack:getTexture() end)
+            if okTex then option.iconTexture = tex end
         end
     end
 
-    -- Recalculate width after replacing/adding the label.
+    if context and context.calcHeight then context:calcHeight() end
     if context and context.calcWidth and context.setWidth then
         context:setWidth(context:calcWidth())
     end

@@ -2,8 +2,9 @@ module HomemadeSuppressors
 {
     craftRecipe MakeHomemadePlasticSuppressor
     {
+        timedAction = Making,
         time = 120,
-        category = Weapon,
+        category = Weaponry,
         NeedToBeLearn = false,
         SkillRequired = Maintenance:1,
         Tags = InHandCraft,
@@ -24,8 +25,9 @@ module HomemadeSuppressors
 
     craftRecipe MakeHomemadeCanSuppressor
     {
+        timedAction = Making,
         time = 240,
-        category = Weapon,
+        category = Weaponry,
         NeedToBeLearn = false,
         SkillRequired = Maintenance:3,
         Tags = InHandCraft,
@@ -47,8 +49,9 @@ module HomemadeSuppressors
 
     craftRecipe MakeHomemadePipeSuppressor
     {
+        timedAction = Making,
         time = 480,
-        category = Weapon,
+        category = Weaponry,
         NeedToBeLearn = false,
         SkillRequired = Maintenance:5;MetalWelding:3,
         Tags = InHandCraft,

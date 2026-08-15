@@ -1,11 +1,11 @@
 name=Inspect Weapon - Guns of Marz Compatibility
 id=GOM_InspectWeaponCompat
-version=0.6.0
-modversion=6
+version=0.8.0
+modversion=8
 versionMin=42.20.2
-description=Fix 4.1 compatibility layer for Inspect Weapon, Gunworks and Guns of Marz. Adds model-aware attachment slots, safe context-menu Remove All Attachments with Gunworks dependency/tool rules, Tidy Up Meister inspection exclusion, live magazine count and clean attachment tooltips. No stat changes.
+description=Fix 4.3 compatibility layer for Inspect Weapon, Gunworks and Guns of Marz. Full readable attachment-slot names, icon attachment picker, correct MountOn compatibility, nearby-container screwdriver support, quick-release bayonets, bulk remove-all/unload-all actions, context-menu crash guard, live magazine count and Tidy Up Meister inspection exclusion. No stat changes.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection
 require=RiskyInspectWeapon,SWMG,MarzGuns
-loadModAfter=RiskyInspectWeapon,SWMG,MarzGuns,GOM_CoreFixes,GOM_AttachmentRebalance,GOM_HomemadeSuppressors,P4TidyUpMeister
+loadModAfter=RiskyInspectWeapon,SWMG,MarzGuns,GOM_CoreFixes,GOM_AttachmentRebalance,GOM_HomemadeSuppressors,CleanUI,P4PickingMeister,P4TidyUpMeister,WeaponReloadMenuCleaner

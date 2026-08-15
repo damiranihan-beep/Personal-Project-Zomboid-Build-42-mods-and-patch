@@ -1,63 +1,50 @@
 # Project Zomboid Build 42.20.2 — Personal Mod Repository
 
-Актуальное состояние пользовательских модов и патчей после рабочего прохода **16.08.2026**.
+Актуальное состояние пользовательских модов и патчей после прохода **16.08.2026 / Fix 4.3**.
 
 ## Текущие версии
 
 - **Guns of Marz Attachment Rebalance — 2.0.0** — утверждённый stock-based ребаланс поколений I–VII/U + редкость.
-- **Weapon Attachment Tooltip Cleaner — 2.7.2 TEST** — компактная совместимость насадок без опасной подмены `MountOn`.
-- **Russian Translation Collection for Mods — 4.5.2** — RetroDashboard 0.2.0 RU (11/11 собственных ключей), Barricaded World RU, компактные типы оружия Guns of Marz и прежние локализационные фиксы.
-- **Homemade Suppressors for Guns of Marz — 3.16 TEST**.
-- **Guns of Marz Core Fixes — 1.1** — FNC stock + M24 integrated bipod permanent-part fixes.
-- **Inspect Weapon - Guns of Marz Compatibility — 0.6.0 / Fix 4.1** — модельно-зависимые слоты, планки/адаптеры, live-магазин, очистка битых hover-tooltip и сохранение правил Gunworks.
-- **Weapon Reload Menu Cleaner — 1.0.0** — единое подменю разрядки без дублей ванили/Picking Meister/Gunworks.
-- **Realistic Combat — 3.8 TEST**, технический ID `RealisticCombat`.
-- **Smoking Universal Patch 42.20.2 — 1.4.3** — без изменений этого прохода.
+- **Weapon Attachment Tooltip Cleaner — 2.7.2 TEST** — UI-совместимость насадок без изменения игрового `MountOn`.
+- **Russian Translation Collection for Mods — 4.5.2** — текущая коллекция переводов, включая RetroDashboard/Barricaded World/короткие inventory-типы GoM.
+- **Homemade Suppressors for Guns of Marz — 3.17 TEST** — три самодельных глушителя + native B42 Crafting UI integration.
+- **Guns of Marz Core Fixes — 1.1** — FNC stock + M24 integrated bipod permanent fixes.
+- **Inspect Weapon - Guns of Marz Compatibility — 0.8.0 / Fix 4.3** — чистые модельные слоты, иконки, правильный MountOn, соседние инструменты, bulk detach/unload, context crash guard.
+- **Weapon Reload Menu Cleaner — 1.1.0** — unified unload для не-GoM; GoM compact unload делегирован Inspect compatibility.
+- **Realistic Combat — 3.8 TEST**, ID `RealisticCombat`.
+- **Smoking Universal Patch — 1.4.4** — корректный выбор пачки из grouped stack + штатный SSO/vanilla path.
 
-## Что сделано в текущем проходе
+## Fix 4.3 — главное
 
-### Weapon Reload Menu Cleaner 1.0.0
+### Inspect Weapon / Guns of Marz
 
-- Несколько пересекающихся пунктов `Вытащить магазин` / `Разрядить <оружие>` / `Разрядить оружие` сводятся в один пункт **`Разрядить оружие >`**.
-- Для оружия, где одновременно есть магазин/боеприпасы магазина и патрон в патроннике: **`Магазин и ствол`** / **`Только магазин`**.
-- Если остаётся только патронник: **`Ствол`**.
-- Съёмный магазин извлекается штатным `ISEjectMagazine`; несъёмный/внутренний магазин разгружается штатным `ISUnloadBulletsFromFirearm`; патронник — `ISRackFirearm`.
-- Порядок полного разряжания намеренный: сначала магазин, затем патронник, чтобы передёргивание не дослало новый патрон.
-- Реальное действие устранения заклинивания остаётся отдельным; обычное ручное передёргивание без патрона в патроннике тоже не удаляется как «дубль».
-- Прямой записи ammo/chamber state нет: сохраняются Gunworks/Guns of Marz reload hooks.
+- Убраны старые кракозябры и бессмысленные `Ничего` в блоке навесного оборудования. Пустой реальный слот показывает **`Нет насадки`** / **`Требуется совместимая насадка`**.
+- Все slot labels полные и русские. Внутри Inspect Weapon также разворачиваются короткие suffix-типы самого оружия: `(пист.)` -> `(пистолет)`, `(ГВ)` -> `(гражданская винтовка)` и т.д. Обычный inventory list остаётся компактным.
+- Пустой слот открывает **иконки совместимых деталей**; длинные текстовые `Добавить/Убрать насадку` для GoM удаляются из обычного ПКМ.
+- Direct GoM attachments проходят реальную `MountOn`-проверку и в UI, и в timed action. `Beretta_Mount` больше не подходит AR-15; старое простое invalid rail-state может быть осторожно восстановлено.
+- Отвёртка ищется в main inventory, сумках и **открытых доступных соседних контейнерах** и переносится автоматически.
+- Detachable bayonet снова quick-release: **без отвёртки**. Integrated fold/deploy не подменяется.
+- `Снять все насадки` работает с оружием из других ячеек; detached parts возвращаются в исходный контейнер оружия.
+- Grouped stack раскрывается до реальных предметов: **`Снять насадки со всего оружия`** / **`Разрядить всё оружие`**.
+- Разрядка использует только штатные B42 actions; chambered round не сбрасывается вручную и возвращается через `ISRackFirearm`.
+- Добавлена защита от подтверждённого свежим логом конфликта **Gunworks `filterPermanentParts` -> `ISContextMenu.removeOptionByName` -> CleanUI**.
 
-### Inspect Weapon - Guns of Marz Compatibility 0.6.0 / Fix 4.1
+### Weapon Reload Menu Cleaner 1.1.0
 
-- Для Guns of Marz больше не рисуются шесть одинаковых жёстких слотов на каждом оружии.
-- Слоты берутся из реальной совместимости конкретной модели: direct `WeaponPart MountOn` + model-specific UniversalAttachment Gunworks + bayonet registry + реально установленные runtime-части.
-- **Browning Hi-Power** больше не получает выдуманные `Ремень`, `Приклад`, `Затыльник`; показываются только поддерживаемые этой моделью категории.
-- Съёмный магазин остаётся отдельным слотом **`Магазин`** с live-count. Несъёмный/внутренний магазин не изображается как съёмная насадка.
-- Реальные планки, адаптеры и нестандартные GoM PartType отображаются как отдельные слоты.
-- Старые attachment-tooltip Inspect Weapon закрываются при перестроении окна; для управляемых GoM-слотов проблемный `ISToolTipInv` не открывается, поэтому красные/битые зависшие строки не должны оставаться после снятия/установки прицела.
-- Установка/снятие **не обходят Gunworks**: отвёртка, RequiredAttachment, UniversalAttachment dependencies, permanent/integrated детали и bayonet actions сохраняются.
-- Статы, `MountOn`, ammo, condition и баланс не меняются.
+- Для `MarzGuns.*` больше не добавляется второй длинный unload-submenu; остаются compact actions Fix 4.3.
+- Для остального оружия прежнее единое меню сохранено.
+- После удаления/перестановки options нормализуются B42 `id=1..N`, `numOptions=N+1`.
 
-- В обычном контекстном меню добавлено **`Снять все насадки`**: только безопасно съёмные детали, с обязательной отвёрткой и child-first зависимостями Gunworks.
-- Съёмный штык также не ставится и не снимается без отвёртки через обычное меню или radial Gunworks; встроенное складывание/раскладывание штыка остаётся отдельной механикой.
-- Permanent/integrated/internal/Clip и активный underbarrel массовым действием не снимаются; заблокированные родители остаются на месте.
-- Tidy Up Meister больше не возвращает оружие на пол после `Осмотр оружия`: `riskyInspectAction` зарегистрирован в его compatibility API как `ignore`.
-- Индивидуальные действия Inspect Weapon также учитывают Railing/Underbarrel и не обходят отвёртку даже для bayonet-пути.
+### Smoking Universal Patch 1.4.4
 
-### Russian Translation Collection 4.5.2
+- В stack из нескольких `CigarettePack` выбирается реальная непустая пачка; приоритет — частично использованная.
+- Действие идёт через vanilla `takePill`, поэтому SSO wrappers и штатный возврат/transfer path не дублируются.
 
-- Найден используемый мод панели: **Banger's Retro Car Dashboard / RetroDashboard 0.2.0**, Workshop `3739256322`.
-- Проверены исходные EN/UA-файлы и все вызовы `getText()` в Lua текущей версии: собственных ключей **11**, переведено **11/11**.
-- `Off/On`, `Locked/Unlocked`, `Heating/Cooling`, `Dashboard backlight` теперь имеют русские состояния.
-- Переведено меню масштаба и единиц скорости панели.
-- Код приборной панели не менялся; русификатор только добавляет штатные RU-ключи и грузится после `RetroDashboard`.
+### Homemade Suppressors 3.17
 
-### Russian Translation Collection 4.5.1
-
-- Barricaded World: `Disable protection for Door/Window` переведены как **`Выключить защиту двери/окна`**, включая `[Хост]` / `[Админ]` префиксы.
-- Итог `Barricaded World: Protected/Unprotected ... doors ... windows ...` после защиты здания заменён русской строкой с теми же счётчиками дверей/окон.
-- Длинные классовые хвосты в отображаемых названиях огнестрела Guns of Marz сокращены. Примеры: **`Mossberg 590 (ДР)`**, **`AR-15 (ГВ)`**, **`AK-47 (ШВ)`**, **`MP5 (ПП)`**.
-- Дополнительный аудит 42.16: **67 из 67** актуальных firearm-форм имеют типовую пометку; P226/Hi-Power/M92FS и другие пистолеты получили `(пист.)`, S&W 629 — `(рев.)`.
-- Игровые ID и характеристики оружия не менялись.
+- Все 3 `craftRecipe` приведены к native B42 Crafting UI: `category = Weaponry`, `timedAction = Making`.
+- Система избранного/сердечек остаётся штатной — собственный fake UI не рисуется.
+- Альтернативные ингредиенты, инструменты, навыки и gameplay-баланс не переписывались.
 
 ## Рекомендуемый порядок загрузки
 
@@ -66,39 +53,40 @@
 3. Guns of Marz Core Fixes 1.1
 4. MarzGuns Sound Overhaul
 5. Guns of Marz Attachment Rebalance 2.0.0
-6. Homemade Suppressors for Guns of Marz 3.16 TEST
+6. Homemade Suppressors for Guns of Marz 3.17 TEST
 7. Inspect Weapon (`RiskyInspectWeapon`)
-8. Tidy Up Meister (`P4TidyUpMeister`) — если используется; compatibility patch грузится после него
-9. Inspect Weapon - Guns of Marz Compatibility 0.6.0 / Fix 4.1
-10. CleanUI / Armor Makes Sense / Equipment UI / Open All Containers / Reorder Containers / Picking Meister / Show Weapon Stats Plus
-11. **Weapon Reload Menu Cleaner 1.0.0** — после Picking Meister и оружейных reload-wrapper'ов
-12. Banger's Retro Car Dashboard (`RetroDashboard`)
-13. Russian Translation Collection 4.5.2 (`loadLast=on`)
-14. Weapon Attachment Tooltip Cleaner 2.7.2 TEST (`loadLast=on`, после переводчика согласно текущей сборке)
-15. Fancy Handwork / compatibility patch
-16. Realistic Combat 3.8 TEST
+8. CleanUI / Picking Meister / Tidy Up Meister — если используются
+9. Weapon Reload Menu Cleaner 1.1.0
+10. Inspect Weapon - Guns of Marz Compatibility 0.8.0 / Fix 4.3
+11. Banger's Retro Car Dashboard (`RetroDashboard`)
+12. Russian Translation Collection 4.5.2 (`loadLast=on`)
+13. Weapon Attachment Tooltip Cleaner 2.7.2 TEST (`loadLast=on` согласно текущей сборке)
+14. Fancy Handwork / compatibility patch
+15. Realistic Combat 3.8 TEST
 
-## Короткий чеклист теста
+`mod.info` Fix 4.3 дополнительно содержит `loadModAfter` для CleanUI / Picking / Tidy / WeaponReloadMenuCleaner, чтобы защитные wrappers ставились поздно.
 
-- Browning Hi-Power: в обычном контекстном меню один `Разрядить оружие >`, без старой тройки дублей.
-- Mossberg 590 с внутренним магазином: один `Разрядить оружие >`; при патроне в патроннике доступны `Магазин и ствол` / `Только магазин`.
-- Проверить заклинившее оружие: отдельное устранение заклинивания не должно исчезнуть.
-- Inspect Browning Hi-Power: нет фиктивных ремня/приклада/затыльника; магазин, реальные планки/прицел/допустимые категории отображаются корректно.
-- Снять/поставить прицел и планку: красная/битая плавающая строка не должна оставаться.
-- Без отвёртки нельзя обойти правило снятия/установки GoM/Gunworks через Inspect Weapon.
-- Контекст оружия с несколькими насадками: `Снять все насадки` без отвёртки недоступно; с отвёрткой сначала уходят дочерние прицелы/модули, затем их планки/адаптеры.
-- Активировать подствольный режим и проверить массовое снятие: активный underbarrel и всё, что из-за него нельзя безопасно снять, должны остаться.
-- Осмотреть оружие прямо с пола при включённом Tidy Up Meister: окно не должно мгновенно закрываться, оружие не должно автоматически улетать обратно на пол во время осмотра.
-- P226 / Hi-Power / M92FS / S&W 629: в имени виден компактный тип `(пист.)` / `(рев.)`.
-- Barricaded World: включить/снять защиту двери и здания; меню и итоговая строка должны быть русскими, счётчики дверей/окон — корректными.
-- RetroDashboard: навести на радио/печь/замки/подсветку — `Off/On/Unlocked/Dashboard backlight` не должны появляться; ПКМ по приборке — масштаб и единицы скорости полностью по-русски.
-- Проверить длинные контекстные строки типа `Вставить 1 патрон ... в Mossberg 590 (ДР)` — полный хвост `— дробовик` больше не должен раздувать меню.
-- После проверки сохранить свежий `console.txt`; особенно полезны строки `[GOM Inspect Weapon Compat] Fix 4.1 ...` и любые ERROR/Exception рядом.
+## Обязательный runtime-тест
+
+Полный чеклист: `Planning/FIX_4_3_TEST_CHECKLIST_RU.md`.
+
+Особенно проверить:
+
+- P226/AR-15: полные типы в Inspect, без кракозябр и raw slot keys;
+- AR-15 не принимает Beretta rail;
+- отвёртка работает из открытого соседнего ящика;
+- штык снимается без отвёртки;
+- 3 оружия в одном stack действительно обрабатываются bulk actions;
+- detached parts возвращаются в исходный контейнер;
+- chambered cartridge после `Разрядить` не исчезает;
+- свежий лог не содержит `removeOptionByName -> filterPermanentParts -> CleanUI`;
+- две пачки сигарет (full + partial) дают рабочее `Курить с пачки сигарет`;
+- три suppressor-рецепта работают с Favorites нового Crafting UI.
 
 ## Структура репозитория
 
-- `README.md` — текущее состояние, версии и чеклист.
-- `CHANGELOG_RU.txt` — общий журнал изменений.
+- `README.md` — текущее состояние.
+- `CHANGELOG_RU.txt` — общий журнал.
 - `My Mods/` — основные пользовательские моды.
-- `My Patch Mods/` — отдельные compatibility/UI/rebalance патчи.
-- `Planning/` — актуальные таблицы планирования/ребаланса.
+- `My Patch Mods/` — compatibility/UI/rebalance патчи.
+- `Planning/` — утверждённые таблицы + ТЗ/чеклист текущего прохода.

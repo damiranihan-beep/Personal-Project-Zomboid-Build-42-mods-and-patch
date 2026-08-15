@@ -9,6 +9,28 @@ PROJECT ZOMBOID BUILD 42.20.2 — ОБЩИЙ ЖУРНАЛ ИЗМЕНЕНИЙ
 16.08.2026
 ======================================================================
 
+Inspect Weapon - Guns of Marz Compatibility — 0.8.0 / Fix 4.3
+- Перестроен GoM-блок осмотра: полные slot names, `Нет насадки` / `Требуется совместимая насадка`, без кракозябр/raw keys.
+- Внутри Inspect Weapon короткие типы оружия разворачиваются в полные; обычный inventory naming не меняется.
+- Установка насадок — icon grid; длинные текстовые Add/Remove attachment menus GoM скрываются.
+- Direct MountOn проверяется на уровне кандидата и timed action; закрыта установка Beretta rail на AR-15 и добавлен осторожный repair старого invalid rail-state.
+- Отвёртка ищется также в открытых соседних контейнерах и переносится автоматически; detachable bayonet — quick-release без отвёртки.
+- `Снять все насадки` работает с другими ячейками/контейнерами и возвращает detached parts в origin; grouped weapon stack получает remove-all/unload-all.
+- `Разрядить` использует vanilla eject/unload/rack и не удаляет chambered cartridge прямой записью.
+- Закрыт свежий context error Gunworks/CleanUI в `ISContextMenu.removeOptionByName`; options нормализуются как 1-based B42 list.
+
+Weapon Reload Menu Cleaner — 1.1.0
+- GoM unload UI делегирован Inspect compatibility без второго длинного submenu.
+- Для остальных пушек unified menu сохранён; исправлены option.id / numOptions после фильтрации.
+
+Smoking Universal Patch — 1.4.4
+- Grouped CigarettePack stack раскрывается до реальных пачек; выбирается частично использованная непустая, затем любая непустая.
+- Сохранён vanilla takePill / ISTakePillAction / Smoking Sounds Overhaul path.
+
+Homemade Suppressors for Guns of Marz — 3.17 TEST
+- Три рецепта переведены в native B42 Crafting UI (`Weaponry`, `Making`) для штатных Favorites/ingredient highlighting.
+- Баланс/звук/износ/поломка не менялись.
+
 Russian Translation Collection for Mods — 4.5.2
 - Banger's Retro Car Dashboard / RetroDashboard 0.2.0 (Workshop 3739256322): переведены все 11/11 собственных ключей текущей версии.
 - Убраны английские `Off/On`, `Locked/Unlocked`, `Heating/Cooling`, `Dashboard backlight`; переведены настройки масштаба и единиц скорости.

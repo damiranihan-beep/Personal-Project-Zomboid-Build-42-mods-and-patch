@@ -1,3 +1,10 @@
+Smoking Universal Patch 42.20.2 — v1.4.4 — 16.08.2026
+- Исправлена работа `Курить с пачки сигарет` на сгруппированном стаке из нескольких `Base.CigarettePack`.
+- Патч раскрывает реальные предметы стака через `ISInventoryPane.getActualItems`, предпочитает непустую частично использованную пачку, затем любую непустую.
+- Действие передаётся напрямую штатному `ISInventoryPaneContextMenu.takePill`, поэтому сохраняются transfer, `ISTakePillAction`, хуки Smoking Sounds Overhaul и стандартный `ReturnItemToOriginalContainer`.
+- Удаляется только старый grouped-pack smoke option с тем же названием; другие pill/consume пункты не затрагиваются.
+- Собственного smoking TimedAction по-прежнему нет.
+
 v1.4.3
 - Частично использованные Base.Lighter и Base.LighterDisposable теперь можно объединять штатным действием «Объединить».
 - Патч НЕ возвращает пачку сигарет или зажигалку обратно в исходный контейнер: за это по-прежнему отвечает отдельный мод пользователя.

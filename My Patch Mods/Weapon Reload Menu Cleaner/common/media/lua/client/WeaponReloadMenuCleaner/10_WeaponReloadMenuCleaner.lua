@@ -1,5 +1,5 @@
 -- Weapon Reload Menu Cleaner
--- v1.0.0 / Project Zomboid Build 42.20.2
+-- v1.1.0 / Project Zomboid Build 42.20.2
 --
 -- Normalizes the several vanilla/modded firearm-unload entries into one menu:
 --   Разрядить оружие > Магазин и ствол / Только магазин / Ствол
@@ -28,6 +28,11 @@ local function safeCall(default, object, methodName)
     local ok, value = pcall(method, object)
     if ok then return value end
     return default
+end
+
+local function isMarzWeapon(weapon)
+    local fullType = safeCall(nil, weapon, "getFullType")
+    return type(fullType) == "string" and string.sub(fullType, 1, 9) == "MarzGuns."
 end
 
 local function hasDetachableMagazine(weapon)
@@ -159,6 +164,14 @@ local function shouldRemoveOption(option, weapon, keptUnjam)
     return false, keptUnjam
 end
 
+local function normalizeContextOptions(context)
+    if not context or not context.options then return end
+    for i, option in ipairs(context.options) do
+        if type(option) == "table" then option.id = i end
+    end
+    context.numOptions = #context.options + 1
+end
+
 local function addUnifiedUnloadMenu(context, weapon, playerObj, insertIndex)
     local detachable = hasDetachableMagazine(weapon)
     local hasMagazineAmmo = detachable and containsMagazine(weapon) or (not detachable and internalAmmoCount(weapon) > 0)
@@ -185,6 +198,7 @@ local function addUnifiedUnloadMenu(context, weapon, playerObj, insertIndex)
         local added = table.remove(context.options, #context.options)
         table.insert(context.options, insertIndex, added)
     end
+    normalizeContextOptions(context)
 end
 
 local installedBase = nil
@@ -214,16 +228,23 @@ local function install()
             end
         end
 
+        normalizeContextOptions(context)
+
         if firstRemoved then
-            -- After deletions, clamp to the first position belonging to this
-            -- weapon's reload block.
-            local insertIndex = math.max(before + 1, math.min(firstRemoved, #context.options + 1))
-            addUnifiedUnloadMenu(context, weapon, playerObj, insertIndex)
+            -- Guns of Marz gets the compact single/bulk unload actions from the
+            -- Inspect Weapon compatibility layer (including grouped inventory
+            -- stacks). Do not add a second text submenu for the same firearm.
+            if not isMarzWeapon(weapon) then
+                -- After deletions, clamp to the first position belonging to this
+                -- weapon's reload block.
+                local insertIndex = math.max(before + 1, math.min(firstRemoved, #context.options + 1))
+                addUnifiedUnloadMenu(context, weapon, playerObj, insertIndex)
+            end
         end
     end
 
     ISInventoryPaneContextMenu.doReloadMenuForWeapon = wrapper
-    print(TAG .. " v1.0.0 installed over final reload-menu chain")
+    print(TAG .. " v1.1.0 installed over final reload-menu chain")
     return true
 end
 
