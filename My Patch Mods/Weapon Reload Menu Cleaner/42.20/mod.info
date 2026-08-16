@@ -1,9 +1,9 @@
 name=Weapon Reload Menu Cleaner
 id=WeaponReloadMenuCleaner
-version=1.1.0
-modversion=2
+version=1.2.0
+modversion=3
 versionMin=42.20.2
-description=Build 42.20.2 compatibility patch that consolidates duplicate firearm unload actions while preserving vanilla timed actions. Guns of Marz compact single/bulk unload actions are delegated to GOM Inspect Weapon Compatibility; non-GoM weapons keep the unified submenu.
+description=Build 42.20.2 reload compatibility patch. Consolidates duplicate firearm unload actions, adds grouped-stack unload-all and load-all magazine actions for inventory/floor/open containers using vanilla/Gunworks timed actions, and preserves Guns of Marz ammo profiles.
 author=Personal Mod Collection
 loadModAfter=P4PickingMeister,SWMG,MarzGuns
 

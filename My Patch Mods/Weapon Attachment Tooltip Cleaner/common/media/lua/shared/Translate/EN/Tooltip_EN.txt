@@ -1,6 +1,6 @@
 Tooltip_EN = {
     -- Native WeaponPart caption retained as our single compatibility header.
-    Tooltip_weapon_CanBeMountOn = "Can attach to",
+    Tooltip_weapon_CanBeMountOn = "",
     Tooltip_weapon_LaserRifle = "Laser sight",
     Tooltip_Weapon_LaserRifle = "Laser sight",
     Tooltip_weapon_LightRifle = "Tactical light",

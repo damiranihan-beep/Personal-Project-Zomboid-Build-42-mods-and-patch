@@ -1,10 +1,9 @@
--- Weapon Attachment Tooltip Cleaner v2.7.1
+-- Weapon Attachment Tooltip Cleaner v2.8.0
 -- Project Zomboid 42.20.2 / Guns of Marz
 --
 -- UI-only goals:
---   * suppress only the native MountOn VALUE while preserving the native caption row;
---   * use that caption as the single "Can attach to" header;
---   * draw our own deterministic compact list BELOW the caption using " / ";
+--   * hide the entire native MountOn compatibility block from visible tooltips;
+--   * do not redraw any "Can attach to" weapon list;
 --   * never derive display names from localized weapon names (prevents mojibake and long class suffixes);
 --   * resolve GoM/GOMAR tooltip localization keys at render time, after translations are available;
 --   * preserve Show Weapon Stats Plus for HandWeapon items;
@@ -138,7 +137,7 @@ local function patchGoMInfoTranslations()
     end
 
     if count > 0 then
-        print("[WATC] v2.7.1 translated GoM info entries: " .. tostring(count))
+        print("[WATC] v2.8.0 translated GoM info entries: " .. tostring(count))
     end
 end
 
@@ -269,9 +268,9 @@ end
 -- IMPORTANT:
 -- B42.20.2 WeaponPart:setMountOn() rejects nil and throws a Java NPE.
 -- We therefore use only a valid empty ArrayList while native DoTooltip runs.
--- This removes the native compatibility VALUE, but intentionally leaves the native
--- caption row. That caption becomes our one and only header; our compact list is
--- appended directly beneath it. The exact original Java List is restored immediately.
+-- Fix 4.4 does not redraw any compatibility list. The translated native caption is
+-- blanked by this load-last UI patch, and the exact original Java MountOn list is
+-- restored immediately after DoTooltip so gameplay compatibility is untouched.
 local function withNativeMountValuesHidden(item, original, fn)
     if not isWeaponPart(item) or type(fn) ~= "function" then return fn() end
     if original == nil then return fn() end
@@ -365,33 +364,21 @@ local COMPAT_MOD_BLUE_G = 148 / 255
 local COMPAT_MOD_BLUE_B = 236 / 255
 
 local function appendOurBlocks(tooltip, item, mountTypes, nativeCaptionPresent)
-    local compatLabels = buildCompatibilityLabels(tooltip, mountTypes)
+    -- Fix 4.4 requirement: compatibility is gameplay data, not tooltip content.
+    -- Native MountOn values are hidden during DoTooltip and we intentionally do
+    -- NOT redraw a compact compatibility list. Keep only independent information
+    -- lines supplied by GoM / the attachment rebalance patch.
     local infoLines = getCustomTooltipLines(item)
-    if (not compatLabels or #compatLabels == 0) and (not infoLines or #infoLines == 0) then return end
+    if not infoLines or #infoLines == 0 then return end
 
     local padLeft = tooltip.padLeft or 5
     local padBottom = tooltip.padBottom or 5
     local currentHeight = tooltip:getHeight()
     local layout = tooltip:beginLayout()
-
-    if compatLabels and #compatLabels > 0 then
-        -- If a rare WeaponPart has no runtime MountOn Java list, native DoTooltip has
-        -- no caption row. Add our header directly (never concatenated) in that case.
-        if not nativeCaptionPresent then
-            layout:addItem():setLabel(compatHeader(), 1.0, 1.0, 1.0, 1.0)
-        end
-        for _, label in ipairs(compatLabels) do
-            layout:addItem():setLabel(label, COMPAT_MOD_BLUE_R, COMPAT_MOD_BLUE_G, COMPAT_MOD_BLUE_B, 1.0)
-        end
+    layout:addItem():setLabel(infoHeader(), 1.0, 0.02, 0.02, 1.0)
+    for _, line in ipairs(infoLines) do
+        layout:addItem():setLabel(line, 1.0, 1.0, 1.0, 1.0)
     end
-
-    if infoLines and #infoLines > 0 then
-        layout:addItem():setLabel(infoHeader(), 1.0, 0.02, 0.02, 1.0)
-        for _, line in ipairs(infoLines) do
-            layout:addItem():setLabel(line, 1.0, 1.0, 1.0, 1.0)
-        end
-    end
-
     local endY = layout:render(padLeft, currentHeight - padBottom, tooltip)
     tooltip:endLayout(layout)
     tooltip:setHeight(endY + padBottom)
@@ -557,7 +544,7 @@ local function installSWSPHook()
     WATC._swspInitBase = base
     WATC._swspInitWrapper = wrapper
     SWSP.initStats = wrapper
-    print("[WATC] v2.7.1 Show Weapon Stats Plus compatibility installed")
+    print("[WATC] v2.8.0 Show Weapon Stats Plus compatibility installed")
     return true
 end
 
@@ -607,7 +594,7 @@ local function install()
     installSWSPHook()
     installItemSlotHook()
     if not installInventoryHook() then return false end
-    print("[WATC] v2.7.1 installed - native MountOn value hidden; compact deterministic list below native caption; compatibility list uses Mod-source blue")
+    print("[WATC] v2.8.0 installed - MountOn compatibility hidden; no Can-attach list is redrawn")
     return true
 end
 
@@ -620,8 +607,8 @@ if Events and Events.OnGameStart then
     end)
 end
 
-WATC.version = "2.7.1"
+WATC.version = "2.8.0"
 WATC.install = install
 WATC.patchGoMInfoTranslations = patchGoMInfoTranslations
-print("[WATC] v2.7.1 loaded - compatibility list blue; no localized-name concatenation, raw tooltip keys guarded")
+print("[WATC] v2.8.0 loaded - compatibility block hidden; raw tooltip keys guarded")
 return WATC

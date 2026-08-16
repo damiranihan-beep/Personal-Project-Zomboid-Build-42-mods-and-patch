@@ -1,3 +1,15 @@
+0.9.0 / Fix 4.4 / 2026-08-16
+- Clean Marz-only prerender: no legacy Risky attachment text underneath dynamic rows.
+- CleanMarzItemNames.lua: 177 UTF-8 names from tested GoM + RU source, used only for display.
+- Removed pre-upgrade hand swapping that closed/invalidated Inspect Weapon actions.
+- Individual context attachment install/remove hidden; true 2+ weapon bulk remove-all retained.
+- Open loot/floor containers are explicit attachment candidate sources.
+- Screwdriver prerequisites are re-checked before item movement; a borrowed screwdriver is queued back to its origin container.
+- Mixed bulk detach plans re-equip the screwdriver after bayonet actions, so later normal parts still pass removal validation.
+- All duplicate top-level Add/Remove/Bayonet/Railing entries are removed, not just the first copy from a grouped selection.
+- Bulk detach/unload returns processed weapon to its origin container.
+- Integrated stock rows use an existing GoM stock icon when the source integrated WeaponPart has no Icon.
+
 Inspect Weapon - Guns of Marz Compatibility
 
 0.8.0 — Fix 4.3 — 16.08.2026

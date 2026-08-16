@@ -1,3 +1,9 @@
+2.8.0 / Fix 4.4 / 2026-08-16
+- Removed visible MountOn compatibility list completely.
+- Native MountOn values stay temporarily hidden only while the tooltip renders.
+- The «Can attach to / Можно прикрепить на» caption is empty in this load-last UI patch.
+- Stats, MountOn compatibility and source item data are never permanently changed.
+
 Weapon Attachment Tooltip Cleaner 2.7.2
 - Точечный текстовый hotfix без изменений MountOn/статов/рендера списка совместимости.
 - Добавлены fallback-переводы пользовательских PartType Guns of Marz: LaserRifle, LightRifle, BoosterScope, Shellholder, BayonetKnife, BayonetIntegrated.

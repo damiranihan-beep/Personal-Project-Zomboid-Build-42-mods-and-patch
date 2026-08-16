@@ -1,0 +1,22 @@
+УТВЕРЖДЁННЫЕ ИКОНКИ — 16.08.2026
+
+Внедрено:
+01 -> Homemade Suppressors for Guns of Marz
+02 -> Realistic Combat
+04 -> Inspect Weapon - Guns of Marz Compatibility
+05 -> Guns of Marz Attachment Rebalance
+06 -> Weapon Attachment Tooltip Cleaner
+07 -> Smoking Universal Patch
+08 -> Weapon Reload Menu Cleaner
+09 -> Russian Translation Collection for Mods
+
+Оставлено без замены:
+- Guns of Marz Core Fixes — его прежняя иконка сохранена; после замены Rebalance/Reload она больше не дублируется.
+
+Зарезервировано:
+03 -> будущая идея «Видеокассеты как баф к опыту»; в текущий мод не внедряется.
+
+Мастер-лист:
+APPROVED_ICON_SHEET.png
+
+Все внедрённые icon.png приведены к 256x256 PNG без растягивания исходного утверждённого арта.

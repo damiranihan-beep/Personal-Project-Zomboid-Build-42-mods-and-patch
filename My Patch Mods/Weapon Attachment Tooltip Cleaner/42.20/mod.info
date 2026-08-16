@@ -1,9 +1,9 @@
 name=Weapon Attachment Tooltip Cleaner
 id=WeaponAttachmentTooltipCleaner
-version=2.7.2
-modversion=20
+version=2.8.0
+modversion=21
 versionMin=42.20.2
-description=UI-only Build 42.20.2 patch for Guns of Marz attachment tooltips. Keeps one native compatibility caption, draws a deterministic blue short-model slash list, preserves Show Weapon Stats Plus, and adds safe localized fallbacks for custom GoM WeaponPart types. No permanent compatibility/stat/item changes.
+description=UI-only Build 42.20.2 patch for Guns of Marz attachment tooltips. Hides the MountOn / Can-attach compatibility caption and weapon list, preserves Show Weapon Stats Plus and custom GoM information lines, and never changes compatibility/stat/item data.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection

@@ -1,5 +1,5 @@
 -- Weapon Reload Menu Cleaner
--- v1.1.0 / Project Zomboid Build 42.20.2
+-- v1.2.0 / Project Zomboid Build 42.20.2
 --
 -- Normalizes the several vanilla/modded firearm-unload entries into one menu:
 --   Разрядить оружие > Магазин и ствол / Только магазин / Ствол
@@ -7,11 +7,18 @@
 
 local TAG = "[Weapon Reload Menu Cleaner]"
 
+local okAmmo, Ammo = pcall(require, "WeaponSystems/Utils/Ammo")
+if not okAmmo or type(Ammo) ~= "table" then Ammo = nil end
+
 pcall(require, "ISUI/ISInventoryPaneContextMenu")
 pcall(require, "ISUI/ISContextMenu")
+pcall(require, "ISUI/ISInventoryPane")
 pcall(require, "TimedActions/ISEjectMagazine")
 pcall(require, "TimedActions/ISUnloadBulletsFromFirearm")
 pcall(require, "TimedActions/ISRackFirearm")
+pcall(require, "TimedActions/ISLoadBulletsInMagazine")
+pcall(require, "TimedActions/ISUnloadBulletsFromMagazine")
+pcall(require, "TimedActions/ISInventoryTransferUtil")
 
 local function tr(key, fallback)
     if getText then
@@ -244,10 +251,314 @@ local function install()
     end
 
     ISInventoryPaneContextMenu.doReloadMenuForWeapon = wrapper
-    print(TAG .. " v1.1.0 installed over final reload-menu chain")
+    print(TAG .. " v1.2.0 installed over final reload-menu chain")
     return true
 end
 
 -- Try immediately, then once again after all active mods have completed loading.
 pcall(install)
 if Events and Events.OnGameStart then Events.OnGameStart.Add(function() pcall(install) end) end
+
+
+-- --------------------------------------------------------------------------
+-- Bulk magazine operations (Fix 4.4)
+-- --------------------------------------------------------------------------
+-- A grouped inventory row can represent many real magazine objects.  Resolve the
+-- hidden items and queue normal B42 timed actions for every magazine, regardless
+-- of whether the row came from the player's inventory, floor or an open crate.
+
+local function addContainerUnique(out, seen, container)
+    if not container then return end
+    local key = tostring(container)
+    if seen[key] then return end
+    seen[key] = true
+    table.insert(out, container)
+end
+
+local function getAccessibleContainers(playerObj)
+    local out, seen = {}, {}
+    if not playerObj then return out end
+    addContainerUnique(out, seen, playerObj:getInventory())
+
+    if ISInventoryPaneContextMenu and ISInventoryPaneContextMenu.getContainers then
+        local ok, list = pcall(ISInventoryPaneContextMenu.getContainers, playerObj)
+        if ok and list then
+            local okSize, size = pcall(function() return list:size() end)
+            if okSize and size then
+                for i = 0, size - 1 do
+                    local okGet, container = pcall(function() return list:get(i) end)
+                    if okGet then addContainerUnique(out, seen, container) end
+                end
+            elseif type(list) == "table" then
+                for _, container in ipairs(list) do addContainerUnique(out, seen, container) end
+            end
+        end
+    end
+
+    local function addPage(page)
+        if not page then return end
+        local backpacks = page.backpacks
+        if not backpacks and page.inventoryPane then backpacks = page.inventoryPane.backpacks end
+        if type(backpacks) ~= "table" then return end
+        for _, entry in pairs(backpacks) do
+            local container = entry and (entry.inventory or entry.container) or nil
+            if not container and entry and entry.getItems then container = entry end
+            addContainerUnique(out, seen, container)
+        end
+    end
+
+    local playerNum = playerObj:getPlayerNum()
+    if getPlayerInventory then
+        local ok, page = pcall(getPlayerInventory, playerNum)
+        if ok then addPage(page) end
+    end
+    if getPlayerLoot then
+        local ok, page = pcall(getPlayerLoot, playerNum)
+        if ok then addPage(page) end
+    end
+    return out
+end
+
+local function isMagazineItem(item)
+    if not item or instanceof(item, "HandWeapon") then return false end
+    if not item.getCurrentAmmoCount or not item.getMaxAmmo then return false end
+    local okMax, maxAmmo = pcall(function() return item:getMaxAmmo() end)
+    return okMax and tonumber(maxAmmo) and tonumber(maxAmmo) > 0
+end
+
+local function getActualContextMagazines(items)
+    if not items then return {} end
+    local actual = items
+    if ISInventoryPane and ISInventoryPane.getActualItems then
+        local ok, resolved = pcall(ISInventoryPane.getActualItems, items)
+        if ok and type(resolved) == "table" then actual = resolved end
+    end
+    local out, seen = {}, {}
+    for _, item in ipairs(actual) do
+        if isMagazineItem(item) then
+            local id = item.getID and item:getID() or tostring(item)
+            if not seen[id] then
+                seen[id] = true
+                table.insert(out, item)
+            end
+        end
+    end
+    return out
+end
+
+local function queueReturnItem(playerObj, item, destination)
+    if not playerObj or not item or not destination then return end
+    local main = playerObj:getInventory()
+    if destination == main then return end
+    if not ISInventoryTransferUtil or not ISInventoryTransferUtil.newInventoryTransferAction then return end
+    local ok, action = pcall(ISInventoryTransferUtil.newInventoryTransferAction,
+        playerObj, item, main, destination, nil)
+    if ok and action then
+        if action.setAllowMissingItems then pcall(function() action:setAllowMissingItems(true) end) end
+        ISTimedActionQueue.add(action)
+    end
+end
+
+local function queueBulkUnloadMagazines(playerObj, magazines)
+    if not playerObj or type(magazines) ~= "table" or not ISUnloadBulletsFromMagazine then return end
+    for _, magazine in ipairs(magazines) do
+        local count = tonumber(safeCall(0, magazine, "getCurrentAmmoCount")) or 0
+        if count > 0 then
+            local origin = magazine.getContainer and magazine:getContainer() or nil
+            ISInventoryPaneContextMenu.transferIfNeeded(playerObj, magazine)
+            ISTimedActionQueue.add(ISUnloadBulletsFromMagazine:new(playerObj, magazine))
+            queueReturnItem(playerObj, magazine, origin)
+        end
+    end
+end
+
+local function getCurrentAmmoKey(magazine)
+    if not magazine or not magazine.getAmmoType then return nil end
+    local ok, ammoType = pcall(function() return magazine:getAmmoType() end)
+    if not ok or not ammoType then return nil end
+    local okKey, key = pcall(function() return ammoType:getItemKey() end)
+    return okKey and key or nil
+end
+
+local function getCompatibleAmmoTypes(magazine)
+    local fullType = safeCall(nil, magazine, "getFullType")
+    if Ammo and fullType and Ammo.ItemAmmoFamily and Ammo.GetBulletTypesForFamily then
+        local family = Ammo.ItemAmmoFamily[fullType]
+        if family then
+            local ok, types = pcall(Ammo.GetBulletTypesForFamily, family)
+            if ok and type(types) == "table" then return types end
+        end
+    end
+    local key = getCurrentAmmoKey(magazine)
+    return key and { key } or {}
+end
+
+local function collectAmmoItems(playerObj, bulletType)
+    local out, seen = {}, {}
+    for _, container in ipairs(getAccessibleContainers(playerObj)) do
+        local ok, list = pcall(function() return container:getAllTypeRecurse(bulletType) end)
+        if ok and list then
+            local okSize, size = pcall(function() return list:size() end)
+            if okSize and size then
+                for i = 0, size - 1 do
+                    local okGet, item = pcall(function() return list:get(i) end)
+                    if okGet and item then
+                        local id = item.getID and item:getID() or tostring(item)
+                        if not seen[id] then
+                            seen[id] = true
+                            table.insert(out, item)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return out
+end
+
+local function chooseAmmoType(magazine, pools)
+    local compatible = getCompatibleAmmoTypes(magazine)
+    if #compatible == 0 then return nil end
+    local currentCount = tonumber(safeCall(0, magazine, "getCurrentAmmoCount")) or 0
+    local currentKey = getCurrentAmmoKey(magazine)
+
+    -- Never change ammunition type inside an already partially loaded magazine.
+    if currentCount > 0 and currentKey then
+        for _, candidate in ipairs(compatible) do
+            if candidate == currentKey and pools[candidate] and #pools[candidate] > 0 then return candidate end
+        end
+        return nil
+    end
+
+    -- Empty magazine: Gunworks registration order is the same priority used by
+    -- its automatic reload helper, so use the first type that is actually present.
+    for _, candidate in ipairs(compatible) do
+        if pools[candidate] and #pools[candidate] > 0 then return candidate end
+    end
+    return nil
+end
+
+local function queueBulkLoadMagazines(playerObj, magazines)
+    if not playerObj or type(magazines) ~= "table" or not ISLoadBulletsInMagazine then return end
+
+    -- Build one shared pool and reserve concrete bullet items before queuing any
+    -- actions. This prevents two magazines from both claiming the same cartridges.
+    local allTypes, pools = {}, {}
+    for _, magazine in ipairs(magazines) do
+        for _, bulletType in ipairs(getCompatibleAmmoTypes(magazine)) do allTypes[bulletType] = true end
+    end
+    for bulletType, _ in pairs(allTypes) do pools[bulletType] = collectAmmoItems(playerObj, bulletType) end
+
+    local plans = {}
+    for _, magazine in ipairs(magazines) do
+        local current = tonumber(safeCall(0, magazine, "getCurrentAmmoCount")) or 0
+        local maximum = tonumber(safeCall(0, magazine, "getMaxAmmo")) or 0
+        local free = math.max(0, maximum - current)
+        if free > 0 then
+            local bulletType = chooseAmmoType(magazine, pools)
+            if bulletType then
+                local reserved = {}
+                for _ = 1, math.min(free, #pools[bulletType]) do
+                    table.insert(reserved, table.remove(pools[bulletType], 1))
+                end
+                if #reserved > 0 then
+                    table.insert(plans, { magazine = magazine, bulletType = bulletType, bullets = reserved })
+                end
+            end
+        end
+    end
+
+    for _, plan in ipairs(plans) do
+        local magazine = plan.magazine
+        local origin = magazine.getContainer and magazine:getContainer() or nil
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, magazine)
+
+        -- B42/Gunworks transferIfNeeded accepts a Java ArrayList. Batch the
+        -- reserved cartridges for this magazine so a 15-magazine stack does not
+        -- create one transfer call per single round. Keep a conservative fallback
+        -- for environments where ArrayList is unavailable.
+        if ArrayList and ArrayList.new then
+            local bulletItems = ArrayList.new()
+            for _, bullet in ipairs(plan.bullets) do bulletItems:add(bullet) end
+            ISInventoryPaneContextMenu.transferIfNeeded(playerObj, bulletItems)
+        else
+            for _, bullet in ipairs(plan.bullets) do
+                ISInventoryPaneContextMenu.transferIfNeeded(playerObj, bullet)
+            end
+        end
+
+        if Ammo and Ammo.MagazineAmmoProfileSetter then
+            pcall(Ammo.MagazineAmmoProfileSetter, magazine, plan.bulletType)
+            -- Gunworks' constructor extension accepts ammoLimit + ammoTypeOverride,
+            -- keeping mixed-ammo magazine bookkeeping correct.
+            ISTimedActionQueue.add(ISLoadBulletsInMagazine:new(
+                playerObj, magazine, #plan.bullets, #plan.bullets, plan.bulletType))
+        else
+            ISTimedActionQueue.add(ISLoadBulletsInMagazine:new(playerObj, magazine, #plan.bullets))
+        end
+        queueReturnItem(playerObj, magazine, origin)
+    end
+end
+
+local function removeNativeMagazineUnloadEntry(context)
+    if not context or type(context.options) ~= "table" then return end
+    local nativeName = getText and getText("ContextMenu_UnloadMagazine") or nil
+    for i = #context.options, 1, -1 do
+        local option = context.options[i]
+        if type(option) == "table" then
+            local isNativeCallback = ISInventoryPaneContextMenu
+                and ISInventoryPaneContextMenu.onUnloadBulletsFromMagazine
+                and option.onSelect == ISInventoryPaneContextMenu.onUnloadBulletsFromMagazine
+            if isNativeCallback or (nativeName and option.name == nativeName) then
+                table.remove(context.options, i)
+            end
+        end
+    end
+    normalizeContextOptions(context)
+end
+
+local function addBulkMagazineContext(playerNum, context, items)
+    if not context or not items then return end
+    local playerObj = getSpecificPlayer(playerNum)
+    if not playerObj then return end
+    local magazines = getActualContextMagazines(items)
+    if #magazines == 0 then return end
+
+    local canUnload, canLoad = false, false
+    for _, mag in ipairs(magazines) do
+        local current = tonumber(safeCall(0, mag, "getCurrentAmmoCount")) or 0
+        local maximum = tonumber(safeCall(0, mag, "getMaxAmmo")) or 0
+        if current > 0 then canUnload = true end
+        if current < maximum then canLoad = true end
+    end
+    if not canUnload and not canLoad then return end
+
+    -- Guarantee the user's "any cell" case even for one magazine on the floor or
+    -- in a crate. Replace the upstream unload entry with our transfer-safe path.
+    if #magazines == 1 then
+        if canUnload then
+            removeNativeMagazineUnloadEntry(context)
+            context:addOption("Разрядить магазин", playerObj, queueBulkUnloadMagazines, magazines)
+        end
+        return
+    end
+
+    -- A real grouped stack/selection gets one bulk submenu operating on every
+    -- concrete magazine hidden behind the inventory row.
+    removeNativeMagazineUnloadEntry(context)
+    local parent = context:addOption("Магазины — групповые действия")
+    local sub = context:getNew(context)
+    context:addSubMenu(parent, sub)
+    if canUnload then
+        sub:addOption("Разрядить все магазины", playerObj, queueBulkUnloadMagazines, magazines)
+    end
+    if canLoad then
+        sub:addOption("Зарядить все магазины", playerObj, queueBulkLoadMagazines, magazines)
+    end
+end
+
+if Events and Events.OnFillInventoryObjectContextMenu then
+    Events.OnFillInventoryObjectContextMenu.Add(addBulkMagazineContext)
+end
+
+print(TAG .. " v1.2.0 bulk magazine load/unload enabled for grouped stacks in inventory/floor/open containers")

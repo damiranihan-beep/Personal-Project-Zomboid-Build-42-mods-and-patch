@@ -1,9 +1,9 @@
 name=Inspect Weapon - Guns of Marz Compatibility
 id=GOM_InspectWeaponCompat
-version=0.8.0
-modversion=8
+version=0.9.0
+modversion=9
 versionMin=42.20.2
-description=Fix 4.3 compatibility layer for Inspect Weapon, Gunworks and Guns of Marz. Full readable attachment-slot names, icon attachment picker, correct MountOn compatibility, nearby-container screwdriver support, quick-release bayonets, bulk remove-all/unload-all actions, context-menu crash guard, live magazine count and Tidy Up Meister inspection exclusion. No stat changes.
+description=Fix 4.4 compatibility layer for Inspect Weapon, Gunworks and Guns of Marz. Clean Marz-only Inspect renderer with mojibake-safe item names, icon attachment picker, fixed direct/universal/bayonet installs, correct MountOn filtering, nearby-container support, grouped-stack remove-all attachments and unload-all weapons, context attachment-menu suppression, FNC integrated-stock icon fallback, live magazine count and Tidy Up Meister inspection exclusion. No stat changes.
 poster=poster.png
 icon=icon.png
 author=Personal Mod Collection

@@ -1,6 +1,6 @@
 Tooltip_RU = {
     -- Native WeaponPart caption retained as our single compatibility header.
-    Tooltip_weapon_CanBeMountOn = "Можно прикрепить на",
+    Tooltip_weapon_CanBeMountOn = "",
     Tooltip_weapon_LaserRifle = "Лазерный целеуказатель",
     Tooltip_Weapon_LaserRifle = "Лазерный целеуказатель",
     Tooltip_weapon_LightRifle = "Тактический фонарь",

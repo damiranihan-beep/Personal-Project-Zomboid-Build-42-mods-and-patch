@@ -1,0 +1,77 @@
+FIX 4.4 — СТАТИЧЕСКАЯ ПРОВЕРКА
+Дата: 16.08.2026
+Целевая версия: Project Zomboid Build 42.20.2
+
+ВАЖНО:
+Это статическая проверка кода/структуры и логическая симуляция. Она не заменяет runtime-тест внутри игры.
+
+1. ВЕРСИИ / ID
+- GOM_InspectWeaponCompat: id сохранён, версия 0.9.0, modversion=9.
+- WeaponReloadMenuCleaner: id сохранён, версия 1.2.0, modversion=3.
+- WeaponAttachmentTooltipCleaner: id сохранён, версия 2.8.0, modversion=21.
+- Игровые ID исходного Guns of Marz не переименовывались.
+
+2. INSTALL / DETACH
+- Прямая GoM-установка использует актуальный ISUpgradeWeapon:new(character, weapon, part), без legacy-аргумента 50.
+- UniversalAttachment передаёт outcomeFullType четвёртым аргументом.
+- Съёмный штык использует штатный BayonetAttachmentContext / ISBayonetAttach / ISBayonetRemove.
+- Перед одиночной установкой отвёртка повторно проверяется до переноса предметов.
+- Временно взятая из соседнего контейнера отвёртка ставится на возврат в исходный контейнер.
+- Mass detach доступен только при 2+ реальных оружиях.
+- Для смешанного плана bayonet + обычные детали отвёртка повторно экипируется перед каждым обычным ISRemoveWeaponUpgrade.
+- Mass detach не использует direct item mutation.
+
+3. КОНТЕКСТНОЕ МЕНЮ
+- Для Marz удаляются все верхнеуровневые копии индивидуальных Add Weapon Upgrade / Remove Weapon Upgrade / Attach Bayonet / Remove Bayonet / Railing Options.
+- Установка одиночной насадки остаётся только в «Осмотр оружия».
+- Для 2+ реальных оружий сохраняется «Снять насадки со всего оружия».
+- Реальный stack раскрывается через ISInventoryPane.getActualItems.
+
+4. МАГАЗИНЫ
+- Одиночная разрядка доступна из inventory/floor/open container через transfer-safe путь.
+- 2+ реальных магазинов получают mass unload и mass load.
+- Для mass load сначала собирается общий пул конкретных патронов из доступных контейнеров, затем физические предметы резервируются между магазинами.
+- Частично заряженный магазин не меняет текущий тип боеприпаса.
+- Пустой магазин выбирает первый реально доступный совместимый тип Gunworks Ammo family.
+- Gunworks MagazineAmmoProfileSetter + расширенный ISLoadBulletsInMagazine используются для ammo profile / AmmoList пути.
+
+5. ЛОГИЧЕСКАЯ СИМУЛЯЦИЯ MASS LOAD
+Сценарий:
+- 15 магазинов;
+- 5 частично заряжены FMJ по 5/15;
+- 5 пустых;
+- 5 частично заряжены HP по 10/15;
+- пул: 100 FMJ + 40 HP = 140 физических патронов.
+
+Результат симуляции алгоритма резервирования:
+- создано 15 планов зарядки;
+- зарезервировано ровно 140 уникальных физических патронов;
+- повторного резервирования одного патрона нет;
+- все частично заряженные магазины сохранили свой текущий тип.
+Результат: PASS.
+
+6. UI / КРАКОЗЯБРЫ
+- Для Marz riskyUI:prerender не вызывает старый hardcoded attachment renderer Risky.
+- CleanMarzItemNames покрывает 171/171 текущих MarzGuns ItemType=base:weaponpart из предоставленного исходника Guns of Marz 42.16; дополнительно содержит 6 служебных/совместимых записей. Итого 177 fallback-имён.
+- Видимые custom labels имеют UTF-8 RU fallback.
+- Короткие суффиксы класса оружия разворачиваются только внутри Inspect.
+- FN FNC upstream имеет ModelWeaponPart для folded/deployed stock; UI fallback используется только вместо отсутствующего inventory Icon и не меняет 3D-модель.
+- attachmentButton render не затирает fallback texture.
+
+7. TOOLTIP
+- WeaponPart MountOn временно заменяется валидным пустым ArrayList только на время native DoTooltip.
+- Исходный Java MountOn восстанавливается сразу после DoTooltip.
+- Fix 4.4 не перерисовывает собственный список совместимого оружия.
+- Gameplay MountOn/статы/ID не меняются.
+
+8. ФАЙЛЫ / КОДИРОВКА / СИНТАКСИС
+Заполняется финальной проверкой перед упаковкой:
+- UTF-8 text files: PASS — 137 файлов, 0 ошибок декодирования, 0 BOM, 0 NUL, 0 U+FFFD.
+- Lua files syntax: PASS — 27/27 проходят loadfile() в texlua.
+- JSON files parse: PASS — 25/25.
+- archive integrity: PASS после контрольной распаковки; TEST = 106 файлов, FULL GitHub-ready = 188 файлов.
+- контрольная распаковка TEST: 15 Lua syntax PASS, 76 UTF-8 text PASS, 12 JSON PASS.
+- контрольная распаковка FULL: 27 Lua syntax PASS, 137 UTF-8 text PASS, 25 JSON PASS.
+
+ИТОГ:
+Структурные и логические проверки Fix 4.4 подготовлены. Runtime-подтверждение установки/снятия/15-магазинного stack требуется в Project Zomboid.
