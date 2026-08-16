@@ -1,14 +1,16 @@
-## Fix 4.5 — 2026-08-16
+## Fix 4.6 — 2026-08-16
 
 GitHub-нумерация для этой загрузки:
-- **My Mods: #-12**
-- **Patch for Other Mods: #-11**
+- **My Mods: #-13**
+- **Patch for Other Mods: #-12**
 
 ### Утверждённые иконки
 
-В Fix 4.5 добавлен утверждённый смешанный набор иконок: самодельные глушители, Realistic Combat с перекрещёнными руками (нож + молоток), Inspect Weapon, Attachment Rebalance, Tooltip Cleaner, Smoking Universal Patch, Weapon Reload Menu Cleaner и общий перевод. Иконка видеокассет сохранена как будущий концепт. Guns of Marz Core Fixes сохраняет прежний значок; после замены остальных его иконка больше не дублируется.
+В Fix 4.6 сохраняется утверждённый смешанный набор иконок: самодельные глушители, Realistic Combat с перекрещёнными руками (нож + молоток), Inspect Weapon, Attachment Rebalance, Tooltip Cleaner, Smoking Universal Patch, Weapon Reload Menu Cleaner и общий перевод. Иконка видеокассет сохранена как будущий концепт. Guns of Marz Core Fixes сохраняет прежний значок; после замены остальных его иконка больше не дублируется.
 
 Все новые `icon.png` — **256x256 PNG**. Утверждённый лист и отдельные исходные иконки лежат в `Planning/Approved Mod Icons 2026-08-16/`.
+
+- В Fix 4.6 дополнительно обновлены все `poster.png`, чтобы Mod Manager в игре показывал новые изображения, а не старые превью.
 
 ## Fix 4.4 — 2026-08-16
 

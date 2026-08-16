@@ -8,4 +8,5 @@ require=SKITTLE_WhereAreMyZangCigs,SmokingSoundsOverhaul
 loadModAfter=SKITTLE_WhereAreMyZangCigs,SmokingSoundsOverhaul
 incompatible=WhereAreMyZangCigs-42.13-patch
 category=QoL
+poster=poster.png
 icon=icon.png
